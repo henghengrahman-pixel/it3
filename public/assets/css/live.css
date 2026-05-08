@@ -83,3 +83,21 @@
       background:#191922;border:1px solid #2b2b38;color:#e8e9f0;border-radius:10px;padding:6px 10px;cursor:pointer
     }
     .modal .mbody{padding:12px}
+.embed7m{
+  width:100%;
+}
+
+.embed7m iframe{
+  width:100%;
+  border:0;
+  background:#fff;
+  border-radius:10px;
+}
+
+.panel.live{
+  overflow:hidden;
+}
+
+.panel.live .twrap{
+  padding:0;
+}
