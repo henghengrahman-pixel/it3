@@ -1,8 +1,31 @@
 <!doctype html>
+
 <html lang="id">
-<head><%- include('../partials/head') %></head>
+
+<head>
+
+  <%- include('../partials/head') %>
+
+  <!-- GLOBAL BACKGROUND -->
+  <style>
+
+    :root{
+
+      --home-bg:
+        url('<%= settings.backgroundImage || "/assets/img/bg.jpg" %>');
+
+    }
+
+  </style>
+
+</head>
+
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
-<%- body %>
-<%- include('../partials/scripts') %>
+
+  <%- body %>
+
+  <%- include('../partials/scripts') %>
+
 </body>
+
 </html>
