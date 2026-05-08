@@ -1,0 +1,12 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/auth-buttons') %>
+<main class="container blog-wrap">
+  <div class="latest-ribbon"><span><%= q || 'Search' %></span></div>
+  <div class="post-list search-results">
+    <% if (!posts.length) { %><div class="single-post"><h1>Tidak ada hasil</h1><p>Coba kata kunci lain.</p></div><% } %>
+    <% posts.forEach(function(post){ %>
+      <article class="news-card"><a class="news-thumb" href="<%= typeof parlayUrl === 'function' ? parlayUrl(post) : ('/prediksi-parlay/' + post.slug) %>"><img src="<%= post.thumbnail %>" alt="<%= post.title %>"></a><div class="news-body"><span class="badge"><%= post.category %></span><h2><a href="<%= typeof parlayUrl === 'function' ? parlayUrl(post) : ('/prediksi-parlay/' + post.slug) %>"><%= post.title %></a></h2><div class="post-meta"><%= fmtDate(post.createdAt) %> • <%= post.author %></div><p><%= post.excerpt %></p></div></article>
+    <% }) %>
+  </div>
+</main>
+<%- include('../partials/footer') %>

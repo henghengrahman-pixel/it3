@@ -1,0 +1,41 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+<main class="container parlay-layout parlay-single-layout">
+  <article class="parlay-single">
+    <a class="badge" href="/category/<%= String(post.category || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') %>"><%= post.category || 'Prediksi Parlay' %></a>
+    <h1><%= post.title %></h1>
+    <div class="single-meta">By <strong><%= post.author || 'Master Parlay' %></strong> • <%= fmtDate(post.createdAt) %> • <% (post.tags || []).forEach(function(tag){ %><span>#<%= tag %></span> <% }) %></div>
+    <% if (post.thumbnail) { %><img class="single-cover" src="<%= post.thumbnail %>" alt="<%= post.title %>"><% } %>
+    <div class="article-content"><%- post.content %></div>
+    <% if ((post.predictions || []).length) { %>
+      <h2>SARAN PREDIKSI PARLAY NANTI MALAM YANG LEBIH AKURAT</h2>
+      <h3>PREDIKSI PARLAY MALAM INI</h3>
+      <% post.predictions.forEach(function(league){ %>
+        <h2 class="league-title"><%= league.league %></h2>
+        <table class="prediksi-table">
+          <thead>
+            <tr><th><%= league.league %></th><th colspan="3">Prediksi</th></tr>
+            <tr><th></th><th>1X2</th><th>O/U</th><th>SKOR</th></tr>
+          </thead>
+          <tbody>
+            <% league.matches.forEach(function(match){ %>
+              <tr><td><%= match.match %></td><td><%= match.pick %></td><td><%= match.ou %></td><td><%= match.score %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% }) %>
+    <% } %>
+    <div class="parlay-note">
+      <p><strong>Rekomendasi BO Aman & Terpercaya</strong></p>
+      <p>Gunakan prediksi ini sebagai referensi tambahan. Selalu bermain secara bijak dan kelola risiko dengan batas yang aman.</p>
+    </div>
+    <% if (related.length) { %>
+      <div class="related"><h3>Related Post</h3><div class="related-grid"><% related.forEach(function(item){ %><a href="<%= parlayUrl(item) %>"><%= item.title %></a><% }) %></div></div>
+    <% } %>
+  </article>
+  <%- include('../partials/sidebar-blog', { latestPosts, ads }) %>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

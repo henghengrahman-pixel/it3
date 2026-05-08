@@ -1,0 +1,14 @@
+<aside class="blog-sidebar">
+  <div class="widget search-widget">
+    <div class="widget-title">Search</div>
+    <form action="/search" method="get"><input name="q" placeholder="Cari berita..."><button type="submit">Search</button></form>
+  </div>
+  <div class="widget latest-widget">
+    <% (latestPosts || []).forEach(function(post){ %>
+      <a class="side-link" href="<%= typeof parlayUrl === 'function' ? parlayUrl(post) : ('/prediksi-parlay/' + post.slug) %>"><%= post.title %></a>
+    <% }) %>
+  </div>
+  <% (ads || []).filter(a => a.position === 'sidebar').forEach(function(ad){ %>
+    <a class="ad-box" href="<%= ad.link %>" target="_blank" rel="noopener"><img src="<%= ad.image %>" alt="<%= ad.title %>" loading="lazy"></a>
+  <% }) %>
+</aside>

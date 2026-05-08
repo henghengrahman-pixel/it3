@@ -1,0 +1,35 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+<section class="parlay-hero"><div class="container"><h1>Prediksi Parlay</h1><p>Update prediksi parlay malam ini berdasarkan liga dan pertandingan yang aktif hari ini.</p></div></section>
+<main class="container parlay-layout">
+  <section class="parlay-list">
+    <% if (!posts.length) { %>
+      <article class="parlay-empty">Belum ada prediksi parlay yang publish.</article>
+    <% } %>
+    <% posts.forEach(function(post){ %>
+      <article class="parlay-card">
+        <a class="parlay-thumb" href="<%= parlayUrl(post) %>"><img src="<%= post.thumbnail %>" alt="<%= post.title %>" loading="lazy"></a>
+        <div class="parlay-body">
+          <a class="badge" href="/category/<%= String(post.category || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') %>"><%= post.category || 'Prediksi Parlay' %></a>
+          <h2><a href="<%= parlayUrl(post) %>"><%= post.title %></a></h2>
+          <div class="post-meta">▣ <%= fmtDate(post.createdAt) %> &nbsp; ▣ <%= post.author || 'Master Parlay' %> &nbsp; ▣ NO COMMENTS</div>
+          <p><%= post.excerpt %></p>
+        </div>
+      </article>
+    <% }) %>
+    <div class="pagination">
+      <% if (currentPage > 1) { %><a href="/prediksi-parlay?page=<%= currentPage - 1 %>">‹</a><% } %>
+      <% for(let i=1; i<=totalPages; i++){ %>
+        <% if (i === currentPage || i <= 2 || i === totalPages || Math.abs(i-currentPage)<=1) { %>
+          <a class="<%= i === currentPage ? 'on' : '' %>" href="/prediksi-parlay?page=<%= i %>"><%= i %></a>
+        <% } else if (i === 3 && currentPage > 4) { %><span>...</span><% } %>
+      <% } %>
+      <% if (currentPage < totalPages) { %><a href="/prediksi-parlay?page=<%= currentPage + 1 %>">›</a><% } %>
+    </div>
+  </section>
+  <%- include('../partials/sidebar-blog', { latestPosts: allPosts.slice(0, 8), ads }) %>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

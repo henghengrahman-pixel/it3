@@ -1,0 +1,43 @@
+<div class="admin-shell">
+  <%- include('partials/sidebar') %>
+  <main class="admin-main">
+    <h1>Dashboard</h1>
+    <div class="admin-grid stats">
+      <div class="admin-card"><div class="k">Posts</div><div class="v"><%= posts?.length || 0 %></div></div>
+      <div class="admin-card"><div class="k">Slides</div><div class="v"><%= slides.length %></div></div>
+      <div class="admin-card"><div class="k">Quick Actions</div><div class="v"><%= quickActions.length %></div></div>
+      <div class="admin-card"><div class="k">Banner Ads</div><div class="v"><%= ads?.length || 0 %></div></div>
+    </div>
+    <% if (typeof autoParlayStatus !== 'undefined') { %>
+    <div class="admin-card">
+      <h2>Auto Prediksi Parlay</h2>
+      <% if (typeof query !== 'undefined' && query?.auto) { %><p><strong><%= query.auto %></strong></p><% } %>
+      <p>Status: <strong><%= autoParlayStatus.enabled === false ? 'OFF' : 'ON' %></strong></p>
+      <p>Run terakhir: <%= autoParlayStatus.lastSuccessAt || autoParlayStatus.lastRunAt || '-' %></p>
+      <p>Next run: <%= autoParlayStatus.nextRunAt || 'menunggu scheduler' %></p>
+      <% if (autoParlayStatus.lastError) { %><p style="color:#f97316">Error: <%= autoParlayStatus.lastError %></p><% } %>
+      <form method="post" action="/admin/auto-parlay/run" class="admin-actions-row">
+        <button class="admin-btn" type="submit">Generate Sekarang</button>
+        <button class="admin-btn ghost" type="submit" name="force" value="true">Force Generate Ulang</button>
+      </form>
+    </div>
+    <% } %>
+    <div class="admin-grid two">
+      <div class="admin-card">
+        <h2>Post Terbaru</h2>
+        <ul class="admin-list">
+          <% (posts || []).slice(0,6).forEach(function(item){ %>
+            <li><strong><%= item.title %></strong><span><%= item.published ? 'Publish' : 'Draft' %></span></li>
+          <% }) %>
+        </ul>
+      </div>
+      <div class="admin-card">
+        <h2>Quick Link</h2>
+        <div class="admin-actions-row">
+          <a class="admin-btn" href="/admin/posts/new">Tambah Post</a>
+          <a class="admin-btn ghost" href="/admin/ads">Kelola Banner</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
