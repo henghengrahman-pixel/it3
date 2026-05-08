@@ -1,0 +1,29 @@
+<div class="admin-shell">
+  <%- include('partials/sidebar') %>
+  <main class="admin-main">
+    <h1>Dashboard</h1>
+    <div class="admin-grid stats">
+      <div class="admin-card"><div class="k">Posts</div><div class="v"><%= posts?.length || 0 %></div></div>
+      <div class="admin-card"><div class="k">Slides</div><div class="v"><%= slides.length %></div></div>
+      <div class="admin-card"><div class="k">Quick Actions</div><div class="v"><%= quickActions.length %></div></div>
+      <div class="admin-card"><div class="k">Banner Ads</div><div class="v"><%= ads?.length || 0 %></div></div>
+    </div>
+    <div class="admin-grid two">
+      <div class="admin-card">
+        <h2>Post Terbaru</h2>
+        <ul class="admin-list">
+          <% (posts || []).slice(0,6).forEach(function(item){ %>
+            <li><strong><%= item.title %></strong><span><%= item.published ? 'Publish' : 'Draft' %></span></li>
+          <% }) %>
+        </ul>
+      </div>
+      <div class="admin-card">
+        <h2>Quick Link</h2>
+        <div class="admin-actions-row">
+          <a class="admin-btn" href="/admin/posts/new">Tambah Post</a>
+          <a class="admin-btn ghost" href="/admin/ads">Kelola Banner</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

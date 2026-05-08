@@ -1,0 +1,12 @@
+<div id="loader" class="loader"><div class="loader-card"><img src="<%= settings.logoUrl %>" alt="<%= settings.siteName %>" style="height:56px;border-radius:10px"/><div class="spin"></div><p>Memuat live score…</p></div></div>
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+<section class="hero"><div class="container"><h1>Live Score</h1><p class="date" id="dateLine"></p></div></section>
+<section class="container"><div class="panel live"><div class="head">LIVE SCORE</div><div class="twrap"><div id="liveList" class="live-list"><div class="muted" style="padding:12px">Memuat data…</div></div></div></div></section>
+<section class="container"><div class="panel"><div class="head">AKAN DIMULAI (NEXT)</div><div class="twrap" style="padding:10px"><div class="next-head"><div class="muted mini">Pertandingan akan mulai dalam beberapa jam ke depan.</div><div class="next-tabs"><button class="tab-btn on" data-h="2">2j</button><button class="tab-btn" data-h="6">6j</button><button class="tab-btn" data-h="12">12j</button><button class="tab-btn" data-h="24">24j</button></div></div><div id="upcomingList" style="margin-top:10px"><div class="muted" style="padding:8px 4px">Memuat jadwal…</div></div></div></div></section>
+<section class="container"><div class="panel"><div class="head">HASIL AKHIR (FT)</div><div class="twrap"><table class="t"><thead><tr><th style="width:220px">Liga</th><th>Pertandingan</th><th style="width:90px">Skor</th><th style="width:80px">Status</th></tr></thead><tbody id="ftBody"><tr><td colspan="4" class="muted">Memuat data…</td></tr></tbody></table></div></div></section>
+<div id="modal" class="modal" aria-hidden="true"><div class="backdrop"></div><div class="card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="mhead"><div id="modalTitle" class="ttl">MATCH DATA</div><button class="mclose" id="modalClose" aria-label="Tutup">✕</button></div><div id="modalBody" class="mbody"></div></div></div>
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

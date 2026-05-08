@@ -1,0 +1,34 @@
+<div class="admin-shell">
+  <%- include('partials/sidebar') %>
+  <main class="admin-main">
+    <h1>Kelola Banner Ads</h1>
+    <div class="admin-card">
+      <h2>Tambah Banner</h2>
+      <form class="admin-form-grid" method="post" enctype="multipart/form-data" action="/admin/ads">
+        <label>Title<input name="title" required></label>
+        <label>Link<input name="link" required></label>
+        <label>Image URL<input name="thumbnailUrl" placeholder="https://..."></label>
+        <label>Upload Image<input type="file" name="imageFile" accept="image/*"></label>
+        <label>Position<input name="position" value="sidebar"></label>
+        <label>Order<input type="number" name="order" value="1"></label>
+        <label class="checkbox"><input type="checkbox" name="active" checked> Active</label>
+        <button class="admin-btn" type="submit">Tambah Banner</button>
+      </form>
+    </div>
+    <% ads.forEach(function(item){ %>
+      <div class="admin-card">
+        <form class="admin-form-grid" method="post" enctype="multipart/form-data" action="/admin/ads/<%= item.id %>/update">
+          <label>Title<input name="title" value="<%= item.title %>"></label>
+          <label>Link<input name="link" value="<%= item.link %>"></label>
+          <label>Image URL<input name="thumbnailUrl" value="<%= item.image %>"></label>
+          <label>Upload Ganti Image<input type="file" name="imageFile" accept="image/*"></label>
+          <label>Position<input name="position" value="<%= item.position %>"></label>
+          <label>Order<input type="number" name="order" value="<%= item.order %>"></label>
+          <label class="checkbox"><input type="checkbox" name="active" <%= item.active ? 'checked' : '' %>> Active</label>
+          <div class="admin-actions-row"><button class="admin-btn" type="submit">Simpan</button></div>
+        </form>
+        <form method="post" action="/admin/ads/<%= item.id %>/delete" onsubmit="return confirm('Hapus banner ini?')"><button class="admin-btn danger" type="submit">Hapus</button></form>
+      </div>
+    <% }) %>
+  </main>
+</div>

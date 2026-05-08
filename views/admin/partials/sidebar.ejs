@@ -1,0 +1,13 @@
+<aside class="admin-sidebar">
+  <div class="admin-brand"><%= settings?.siteName || 'Admin Panel' %></div>
+  <nav>
+    <a href="/admin/dashboard" class="<%= pageTitle === 'Dashboard Admin' ? 'on' : '' %>">Dashboard</a>
+    <a href="/admin/posts" class="<%= pageTitle === 'Kelola Posts' || pageTitle === 'Tambah Post' || pageTitle === 'Edit Post' ? 'on' : '' %>">Posts / Berita</a>
+    <a href="/admin/ads" class="<%= pageTitle === 'Kelola Ads' ? 'on' : '' %>">Banner Ads</a>
+    <a href="/admin/slides" class="<%= pageTitle === 'Kelola Slides' ? 'on' : '' %>">Slides</a>
+    <a href="/admin/quick-actions" class="<%= pageTitle === 'Kelola Quick Actions' ? 'on' : '' %>">Quick Actions</a>
+    <a href="/admin/settings" class="<%= pageTitle === 'Site Settings' ? 'on' : '' %>">Settings</a>
+    <a href="/" target="_blank" rel="noopener">Lihat Website</a>
+  </nav>
+  <form method="post" action="/admin/logout"><button class="admin-btn ghost" type="submit">Logout</button></form>
+</aside>
