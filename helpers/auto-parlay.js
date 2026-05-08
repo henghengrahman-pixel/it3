@@ -6,7 +6,7 @@ import { getFixturesByDate, normalizeFixture } from "./football-api.js";
 
 const TZ = process.env.AUTO_PARLAY_TIMEZONE || "Asia/Jakarta";
 const STATUS_FILE = "auto-parlay-status.json";
-const DEFAULT_THUMBNAIL = process.env.AUTO_PARLAY_THUMBNAIL_URL || "https://i.ibb.co.com/4RtZz3W/prediksi-parlay.jpg";
+const DEFAULT_THUMBNAIL = process.env.AUTO_PARLAY_THUMBNAIL_URL || "https://i.ibb.co/RTFBCzGc/image.png";
 
 let timer = null;
 let running = false;
