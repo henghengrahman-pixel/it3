@@ -8,7 +8,7 @@ const TZ = process.env.AUTO_PARLAY_TIMEZONE || "Asia/Jakarta";
 const STATUS_FILE = "auto-parlay-status.json";
 const DEFAULT_THUMBNAIL =
   process.env.AUTO_PARLAY_THUMBNAIL_URL ||
-  "https://i.ibb.co/PzwrPX3j/image.png";
+  "https://i.ibb.co/1tFDCWCP/PREDIKSI.png";
 
 let timer = null;
 let running = false;
@@ -129,7 +129,10 @@ function predictMatch(fixture) {
 function getLeaguePriority(name = "") {
   const n = String(name).toLowerCase().trim();
 
-  if (n.includes("champions league") && (n.includes("uefa") || n === "champions league")) {
+  if (
+    n.includes("champions league") &&
+    (n.includes("uefa") || n === "champions league")
+  ) {
     return 1000;
   }
 
@@ -247,9 +250,13 @@ function isBlockedLeague(name = "") {
     n.includes("victoria") ||
     n.includes("tasmania") ||
     n.includes("new south wales") ||
-    n.includes("northern") ||
     n.includes("western australia") ||
-    n.includes("south australia")
+    n.includes("south australia") ||
+    n.includes("northern") ||
+    n.includes("friendly") ||
+    n.includes("friendlies") ||
+    n.includes("amateur") ||
+    n.includes("lower league")
   );
 }
 
@@ -516,7 +523,6 @@ export async function generateDailyParlay({ force = false, date = null } = {}) {
     };
 
     rows.unshift(post);
-
     await savePosts(rows);
 
     await writeStatus({
@@ -551,7 +557,7 @@ export async function generateDailyParlay({ force = false, date = null } = {}) {
 
 export function startAutoParlayScheduler() {
   if (process.env.AUTO_PARLAY_ENABLED === "false") {
-    console.log("[AUTO PARLAY] disabled by AUTO_PARLAY_ENABLED=false");
+    console.log("[AUTO PARLAY] disabled");
     return;
   }
 
@@ -573,7 +579,6 @@ export function startAutoParlayScheduler() {
       console.log(`[AUTO PARLAY] run at 00:00 ${TZ}`);
 
       await generateDailyParlay();
-
       scheduleNext();
     }, delay);
   };
