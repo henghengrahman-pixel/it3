@@ -5,7 +5,9 @@ import { slugify, makeExcerpt } from "./slug.js";
 import { getFixturesByDate, normalizeFixture } from "./football-api.js";
 
 const TZ = process.env.AUTO_PARLAY_TIMEZONE || "Asia/Jakarta";
+
 const STATUS_FILE = "auto-parlay-status.json";
+
 const DEFAULT_THUMBNAIL =
   process.env.AUTO_PARLAY_THUMBNAIL_URL ||
   "https://i.ibb.co/1tFDCWCP/PREDIKSI.png";
@@ -43,14 +45,18 @@ function nowParts(date = new Date()) {
 
 function addDays(dateString, amount) {
   const d = new Date(`${dateString}T00:00:00.000Z`);
+
   d.setUTCDate(d.getUTCDate() + amount);
+
   return d.toISOString().slice(0, 10);
 }
 
 function nextMidnightDelay() {
   const p = nowParts();
+
   const msToday =
-    ((p.hour * 60 + p.minute) * 60 + p.second) * 1000;
+    ((p.hour * 60 + p.minute) * 60 + p.second) *
+    1000;
 
   const oneDay = 24 * 60 * 60 * 1000;
 
@@ -128,26 +134,36 @@ function predictMatch(fixture) {
   let pick = "X";
 
   if (diff > 9) pick = "1";
+
   if (diff < -6) pick = "2";
 
   let homeGoals = 1 + (seed % 3);
+
   let awayGoals = 1 + ((seed >> 3) % 3);
 
-  if (pick === "1" && homeGoals <= awayGoals) {
+  if (
+    pick === "1" &&
+    homeGoals <= awayGoals
+  ) {
     homeGoals = awayGoals + 1;
   }
 
-  if (pick === "2" && awayGoals <= homeGoals) {
+  if (
+    pick === "2" &&
+    awayGoals <= homeGoals
+  ) {
     awayGoals = homeGoals + 1;
   }
 
   if (pick === "X") {
     const g = (seed % 2) + 1;
+
     homeGoals = g;
     awayGoals = g;
   }
 
   homeGoals = Math.min(homeGoals, 4);
+
   awayGoals = Math.min(awayGoals, 4);
 
   const ou =
@@ -168,6 +184,7 @@ function predictMatch(fixture) {
 function getLeaguePriority(name = "") {
   const n = String(name).toLowerCase();
 
+  // SUPER PRIORITAS
   if (
     n.includes("champions league") ||
     n.includes("uefa champions")
@@ -216,7 +233,7 @@ function getLeaguePriority(name = "") {
     return 860;
   }
 
-  // LIGA INDONESIA
+  // INDONESIA
   if (
     n.includes("liga 1 indonesia") ||
     n.includes("bri liga 1") ||
@@ -225,7 +242,7 @@ function getLeaguePriority(name = "") {
     return 850;
   }
 
-  // CUP BESAR
+  // CUP
   if (
     n.includes("fa cup") ||
     n.includes("super cup") ||
@@ -244,7 +261,7 @@ function groupPredictions(fixtures) {
   for (const raw of fixtures) {
     const f = normalizeFixture(raw);
 
-    // skip match selesai
+    // skip selesai
     if (
       [
         "FT",
@@ -260,8 +277,27 @@ function groupPredictions(fixtures) {
       continue;
     }
 
+    const leagueName =
+      f.league || "Unknown League";
+
+    // filter women/youth/reserve
+    const lowerLeague =
+      leagueName.toLowerCase();
+
+    if (
+      lowerLeague.includes("women") ||
+      lowerLeague.includes("youth") ||
+      lowerLeague.includes("reserve") ||
+      lowerLeague.includes("u21") ||
+      lowerLeague.includes("u19") ||
+      lowerLeague.includes("u18") ||
+      lowerLeague.includes("u17")
+    ) {
+      continue;
+    }
+
     const priority =
-      getLeaguePriority(f.league);
+      getLeaguePriority(leagueName);
 
     // buang liga kecil
     if (priority < 500) {
@@ -272,11 +308,11 @@ function groupPredictions(fixtures) {
 
     item.priority = priority;
 
-    if (!grouped.has(f.league)) {
-      grouped.set(f.league, []);
+    if (!grouped.has(leagueName)) {
+      grouped.set(leagueName, []);
     }
 
-    grouped.get(f.league).push(item);
+    grouped.get(leagueName).push(item);
   }
 
   const result = [...grouped.entries()]
@@ -427,11 +463,17 @@ export async function getAutoParlayStatus() {
     enabled:
       process.env.AUTO_PARLAY_ENABLED !==
       "false",
+
     running: false,
+
     lastRunAt: null,
+
     lastSuccessAt: null,
+
     lastError: null,
+
     lastCreatedSlug: null,
+
     nextRunAt: null
   });
 }
@@ -453,11 +495,21 @@ export async function generateDailyParlay({
 
   const runAt = new Date().toISOString();
 
-  await writeStatus({
-    running: true,
-    lastRunAt: runAt,
-    lastError: null
-  });
+  // FIX SAFE WRITE STATUS
+  try {
+    await writeStatus({
+      running: true,
+      lastRunAt: runAt,
+      lastError: null
+    });
+  } catch (err) {
+    running = false;
+
+    return {
+      ok: false,
+      error: err.message
+    };
+  }
 
   try {
     const targetDate =
@@ -515,7 +567,8 @@ export async function generateDailyParlay({
       );
 
     if (!predictions.length) {
-      const msg = `Tidak ada pertandingan besar untuk tanggal ${targetDate}.`;
+      const msg =
+        `Tidak ada pertandingan besar untuk tanggal ${targetDate}.`;
 
       await writeStatus({
         running: false,
@@ -528,9 +581,10 @@ export async function generateDailyParlay({
       };
     }
 
-    const title = `PREDIKSI PARLAY JITU MALAM INI ${prettyDateRange(
-      targetDate
-    )}`;
+    const title =
+      `PREDIKSI PARLAY JITU MALAM INI ${prettyDateRange(
+        targetDate
+      )}`;
 
     let rows = force
       ? posts.filter(
@@ -570,6 +624,7 @@ export async function generateDailyParlay({
         .slice(0, 8)}`,
 
       title,
+
       slug,
 
       category:
@@ -639,7 +694,7 @@ export async function generateDailyParlay({
     await writeStatus({
       running: false,
       lastError: error
-    });
+    }).catch(() => {});
 
     return {
       ok: false,
@@ -660,6 +715,12 @@ export function startAutoParlayScheduler() {
     );
 
     return;
+  }
+
+  // CLEAR TIMER LAMA
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
   }
 
   const scheduleNext = async () => {
@@ -697,8 +758,8 @@ export function startAutoParlayScheduler() {
       .AUTO_PARLAY_RUN_ON_START ===
     "true"
   ) {
-    setTimeout(() => {
-      generateDailyParlay();
+    setTimeout(async () => {
+      await generateDailyParlay();
     }, 5000);
   }
 }
