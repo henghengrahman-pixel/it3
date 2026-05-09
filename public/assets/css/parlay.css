@@ -302,3 +302,226 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
   }
 
 }
+/* =========================
+   FIX FINAL PREMIUM PARLAY
+========================= */
+
+.parlay-single-pro{
+  background:#081226!important;
+  color:#fff!important;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);
+  overflow:hidden;
+}
+
+.parlay-single-pro *{
+  color:inherit;
+}
+
+.parlay-single-pro .article-content,
+.parlay-single-pro .article-content p{
+  color:#dbe4f0!important;
+  line-height:1.9;
+  font-size:17px;
+}
+
+.parlay-single-pro h1,
+.parlay-single-pro h2,
+.parlay-single-pro h3,
+.parlay-single-pro .league-title{
+  color:#fff!important;
+}
+
+.parlay-single-pro .single-meta{
+  color:#94a3b8!important;
+}
+
+.parlay-single-pro .meta-tag{
+  color:#38bdf8!important;
+}
+
+.parlay-single-pro .premium-note{
+  background:#0f172a!important;
+  color:#dbe4f0!important;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.parlay-single-pro .premium-note h3{
+  color:#fff!important;
+}
+
+.parlay-single-pro .league-box{
+  background:#0f172a!important;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.parlay-single-pro .league-head{
+  background:#111c33!important;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.parlay-single-pro .league-count{
+  color:#94a3b8!important;
+}
+
+.parlay-single-pro .premium-table{
+  background:#0f172a!important;
+}
+
+.parlay-single-pro .premium-table th{
+  background:#081226!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.06)!important;
+}
+
+.parlay-single-pro .premium-table td{
+  background:#0f172a!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.06)!important;
+}
+
+.parlay-single-pro .premium-table tr:hover td{
+  background:#152238!important;
+}
+
+.parlay-single-pro .match-name{
+  color:#fff!important;
+  font-size:17px;
+  line-height:1.6;
+}
+
+.parlay-single-pro .score-text{
+  color:#fff!important;
+  font-size:18px;
+  font-weight:800;
+}
+
+.parlay-single-pro .odds-text{
+  color:#38bdf8!important;
+  font-weight:800;
+}
+
+.parlay-single-pro .pick{
+  font-size:24px;
+  font-weight:900;
+}
+
+.parlay-single-pro .pick-1{
+  color:#22c55e!important;
+}
+
+.parlay-single-pro .pick-x{
+  color:#facc15!important;
+}
+
+.parlay-single-pro .pick-2{
+  color:#ef4444!important;
+}
+
+.parlay-single-pro .ou-badge{
+  color:#fff!important;
+  font-weight:800;
+}
+
+.parlay-single-pro .confidence-wrap{
+  width:100px;
+  margin:auto;
+}
+
+.parlay-single-pro .confidence-bar{
+  background:#1e293b!important;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.parlay-single-pro .confidence-bar span{
+  background:linear-gradient(
+    90deg,
+    #22c55e,
+    #84cc16
+  )!important;
+}
+
+.parlay-single-pro .confidence-wrap small{
+  color:#fff!important;
+  font-weight:700;
+}
+
+.parlay-single-pro .match-badges{
+  margin-top:10px;
+}
+
+.parlay-single-pro .badge{
+  border:none!important;
+  box-shadow:none!important;
+}
+
+.parlay-single-pro .safe-badge{
+  background:#16a34a!important;
+  color:#fff!important;
+}
+
+.parlay-single-pro .big-badge{
+  background:#dc2626!important;
+  color:#fff!important;
+}
+
+.parlay-single-pro .super-badge{
+  background:#7c3aed!important;
+  color:#fff!important;
+}
+
+.parlay-single-pro .hot-badge{
+  background:#ea580c!important;
+  color:#fff!important;
+}
+
+.parlay-single-pro .prime-badge{
+  background:#0284c7!important;
+  color:#fff!important;
+}
+
+.parlay-single-pro .related-card{
+  background:#0f172a!important;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.parlay-single-pro .related-info h4{
+  color:#fff!important;
+}
+
+.parlay-single-pro .related-info span{
+  color:#94a3b8!important;
+}
+
+.parlay-single-pro .related-card:hover{
+  transform:translateY(-5px);
+  border-color:#38bdf8;
+}
+
+@media(max-width:768px){
+
+  .parlay-single-pro{
+    padding:16px!important;
+  }
+
+  .parlay-single-pro .single-title{
+    font-size:24px!important;
+    line-height:1.5;
+  }
+
+  .parlay-single-pro .premium-table th,
+  .parlay-single-pro .premium-table td{
+    font-size:13px!important;
+    padding:12px 10px!important;
+  }
+
+  .parlay-single-pro .match-cell{
+    min-width:240px!important;
+  }
+
+  .parlay-single-pro .pick{
+    font-size:18px!important;
+  }
+
+}
