@@ -35,7 +35,7 @@ body.body-parlay .authbar{
 
 .parlay-layout{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 330px;
+  grid-template-columns:minmax(0,1fr) 320px;
   gap:28px;
   align-items:start;
   margin-top:34px;
@@ -124,173 +124,128 @@ body.body-parlay .authbar{
 }
 
 .prediction-section{
-  margin-top:42px;
+  margin-top:40px;
 }
 
 .prediction-header{
-  margin-bottom:24px;
+  margin-bottom:28px;
 }
 
 .prediction-header h2{
   font-size:34px;
-  line-height:1.2;
-  color:#111827;
   font-weight:900;
-  margin:0 0 10px;
+  color:#111827;
+  margin:0 0 12px;
 }
 
 .prediction-header p{
   font-size:16px;
   line-height:1.8;
   color:#4b5563;
-  margin:0;
 }
 
-.league-section{
-  margin-top:36px;
-}
-
-.league-heading{
-  margin-bottom:18px;
+.prediction-table-wrap{
+  margin-bottom:42px;
 }
 
 .league-title{
-  font-size:28px!important;
-  line-height:1.2;
-  color:#111827!important;
+  font-size:32px!important;
   font-weight:900!important;
-  margin:0!important;
+  color:#111827!important;
+  margin-bottom:18px!important;
 }
 
-.match-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
-}
-
-.match-card{
+.prediksi-table{
+  width:100%;
+  border-collapse:collapse;
   background:#fff;
-  border-radius:22px;
   border:1px solid #e5e7eb;
-  overflow:hidden;
-  box-shadow:
-    0 8px 24px rgba(0,0,0,.05);
-  transition:.2s ease;
 }
 
-.match-card:hover{
-  transform:translateY(-3px);
-  box-shadow:
-    0 14px 32px rgba(0,0,0,.08);
+.prediksi-table thead tr:first-child{
+  background:#f8fafc;
 }
 
-.match-card-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 18px;
-  background:
-    linear-gradient(
-      135deg,
-      #111827,
-      #1f2937
-    );
-}
-
-.match-number{
-  color:#fff;
-  font-size:13px;
+.prediksi-table thead th{
+  border:1px solid #e5e7eb;
+  padding:16px;
+  font-size:16px;
+  color:#111827;
   font-weight:800;
+  text-align:left;
 }
 
-.match-time{
-  color:#d1d5db;
-  font-size:12px;
-  font-weight:700;
+.prediksi-table tbody td{
+  border:1px solid #e5e7eb;
+  padding:18px 14px;
+  vertical-align:middle;
+  font-size:15px;
+  color:#111827;
 }
 
-.match-card-body{
-  padding:24px 20px 22px;
+.match-team-col{
+  width:55%;
+}
+
+.match-team-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
 .team-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
   gap:12px;
 }
 
-.team{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-}
-
-.team img{
-  width:62px;
-  height:62px;
+.team-row img{
+  width:38px;
+  height:38px;
   object-fit:contain;
-  margin-bottom:10px;
+  flex-shrink:0;
 }
 
-.team span{
-  font-size:15px;
+.team-row span{
+  font-size:17px;
+  line-height:1.5;
   font-weight:800;
   color:#111827;
-  line-height:1.5;
 }
 
-.vs{
-  width:44px;
-  height:44px;
-  min-width:44px;
-  border-radius:999px;
-  background:#f3f4f6;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.vs-text{
   font-size:12px;
   font-weight:900;
+  color:#9ca3af;
+  margin-left:50px;
+  letter-spacing:1px;
+}
+
+.match-time{
+  margin-left:50px;
+  font-size:12px;
   color:#6b7280;
-}
-
-.prediction-boxes{
-  display:grid;
-  grid-template-columns:
-    repeat(3,minmax(0,1fr));
-  gap:12px;
-  margin-top:24px;
-}
-
-.pred-box{
-  background:
-    linear-gradient(
-      135deg,
-      #111827,
-      #1f2937
-    );
-  border-radius:16px;
-  padding:14px 10px;
-  text-align:center;
-}
-
-.pred-box small{
-  display:block;
-  font-size:11px;
   font-weight:700;
-  color:#cbd5e1;
-  margin-bottom:6px;
-  letter-spacing:.5px;
 }
 
-.pred-box strong{
-  display:block;
-  font-size:15px;
-  line-height:1.3;
-  color:#fff;
+.prediksi-table tbody td:nth-child(2),
+.prediksi-table tbody td:nth-child(3),
+.prediksi-table tbody td:nth-child(4){
+  text-align:center;
+  width:15%;
+}
+
+.prediksi-table tbody td strong{
+  font-size:18px;
   font-weight:900;
+}
+
+.ou-col strong{
+  color:#d97706;
+}
+
+.score-col strong{
+  color:#059669;
 }
 
 .parlay-note{
@@ -409,10 +364,6 @@ body.body-parlay .authbar{
     display:none;
   }
 
-  .match-grid{
-    grid-template-columns:1fr;
-  }
-
   .parlay-single{
     padding:26px 20px;
   }
@@ -430,11 +381,60 @@ body.body-parlay .authbar{
   }
 }
 
+@media(max-width:768px){
+
+  .prediction-heading{
+    font-size:26px;
+  }
+
+  .league-title{
+    font-size:24px!important;
+  }
+
+  .prediksi-table thead th{
+    font-size:12px;
+    padding:10px 6px;
+  }
+
+  .prediksi-table tbody td{
+    padding:12px 6px;
+    font-size:12px;
+  }
+
+  .team-row{
+    gap:8px;
+  }
+
+  .team-row img{
+    width:26px;
+    height:26px;
+  }
+
+  .team-row span{
+    font-size:12px;
+    line-height:1.4;
+  }
+
+  .match-time{
+    margin-left:34px;
+    font-size:10px;
+  }
+
+  .vs-text{
+    margin-left:34px;
+    font-size:10px;
+  }
+
+  .prediksi-table tbody td strong{
+    font-size:13px;
+  }
+}
+
 @media(max-width:680px){
 
   .parlay-single{
     border-radius:18px;
-    padding:22px 16px;
+    padding:22px 14px;
   }
 
   .parlay-single h1{
@@ -446,52 +446,20 @@ body.body-parlay .authbar{
     border-radius:16px;
   }
 
-  .prediction-header h2{
+  .article-content{
+    font-size:15px;
+    line-height:1.8;
+  }
+
+  .article-content h2{
     font-size:24px;
+  }
+
+  .article-content h3{
+    font-size:20px;
   }
 
   .league-title{
     font-size:22px!important;
-  }
-
-  .match-card{
-    border-radius:18px;
-  }
-
-  .match-card-body{
-    padding:20px 16px;
-  }
-
-  .team img{
-    width:52px;
-    height:52px;
-  }
-
-  .team span{
-    font-size:13px;
-  }
-
-  .prediction-boxes{
-    gap:8px;
-  }
-
-  .pred-box{
-    padding:12px 6px;
-    border-radius:12px;
-  }
-
-  .pred-box strong{
-    font-size:13px;
-  }
-
-  .pred-box small{
-    font-size:10px;
-  }
-
-  .vs{
-    width:38px;
-    height:38px;
-    min-width:38px;
-    font-size:11px;
   }
 }
