@@ -28,35 +28,68 @@ const DEFAULT_THUMBNAIL =
 
 const PRIORITY_LEAGUES = [
 
+  // ======================
   // INDONESIA
+  // ======================
+
   "Liga 1",
   "BRI Liga 1",
+  "Indonesia",
 
+  // ======================
   // INGGRIS
+  // ======================
+
   "Premier League",
+  "England Premier League",
 
+  // ======================
   // SPANYOL
+  // ======================
+
   "La Liga",
+  "Spain La Liga",
 
+  // ======================
   // ITALIA
+  // ======================
+
   "Serie A",
+  "Italy Serie A",
 
+  // ======================
   // JERMAN
+  // ======================
+
   "Bundesliga",
+  "Germany Bundesliga",
 
+  // ======================
   // PRANCIS
+  // ======================
+
   "Ligue 1",
+  "France Ligue 1",
 
+  // ======================
   // EROPA
-  "UEFA Champions League",
-  "UEFA Europa League",
-  "UEFA Europa Conference League",
+  // ======================
 
+  "Champions League",
+  "Europa League",
+  "Conference League",
+
+  // ======================
   // ASIA
+  // ======================
+
   "Saudi Pro League",
   "AFC Champions League",
 
+  // ======================
   // AMERIKA
+  // ======================
+
   "MLS",
   "Copa Libertadores"
 
@@ -397,22 +430,44 @@ function allowedLeague(name = ""){
 
   if (!name) return false;
 
-  // BLOCK
+  const leagueName =
+    String(name).toLowerCase();
+
+  // ======================
+  // BLOCK LIGA TIDAK PENTING
+  // ======================
+
   if (
+
     BLOCKED_KEYWORDS.some(
+
       word =>
-        name
-          .toLowerCase()
-          .includes(
-            word.toLowerCase()
-          )
+
+        leagueName.includes(
+          word.toLowerCase()
+        )
+
     )
+
   ){
+
     return false;
+
   }
 
-  // PRIORITAS
-  return PRIORITY_LEAGUES.includes(name);
+  // ======================
+  // PRIORITAS LIGA BESAR
+  // ======================
+
+  return PRIORITY_LEAGUES.some(
+
+    league =>
+
+      leagueName.includes(
+        league.toLowerCase()
+      )
+
+  );
 
 }
 
@@ -429,6 +484,10 @@ function groupPredictions(fixtures){
 
     const f =
       normalizeFixture(raw);
+    console.log(
+  "[AUTO PARLAY LEAGUE]",
+  f.league
+);
 
     // STATUS
     if (
