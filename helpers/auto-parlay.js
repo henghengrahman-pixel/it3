@@ -148,88 +148,93 @@ function predictMatch(fixture) {
   );
 
   const homePower =
-    45 +
-    (hashNum(
-      `${fixture.home}-home`
-    ) %
-      55);
+    50 +
+    (hashNum(`${fixture.home}`) %
+      35);
 
   const awayPower =
-    45 +
-    (hashNum(
-      `${fixture.away}-away`
-    ) %
-      55);
+    50 +
+    (hashNum(`${fixture.away}`) %
+      35);
 
-  const homeBoost =
-    8 + (seed % 7);
+  const homeAdvantage = 8;
 
-  const diff =
-    homePower +
-    homeBoost -
-    awayPower;
+  const totalPower =
+    homePower + awayPower;
+
+  const homeChance =
+    (homePower + homeAdvantage) /
+    (totalPower + homeAdvantage);
 
   let pick = "X";
 
-  if (diff > 9) {
+  if (homeChance >= 0.58) {
     pick = "1";
-  }
-
-  if (diff < -6) {
+  } else if (
+    homeChance <= 0.44
+  ) {
     pick = "2";
   }
 
-  let homeGoals =
-    1 + (seed % 3);
+  let homeGoals = 0;
+  let awayGoals = 0;
 
-  let awayGoals =
-    1 + ((seed >> 3) % 3);
-
-  if (
-    pick === "1" &&
-    homeGoals <= awayGoals
-  ) {
+  if (pick === "1") {
     homeGoals =
-      awayGoals + 1;
-  }
+      1 + (seed % 3);
 
-  if (
-    pick === "2" &&
-    awayGoals <= homeGoals
-  ) {
     awayGoals =
-      homeGoals + 1;
+      seed % 2;
   }
 
-  if (pick === "X") {
-    const g =
-      (seed % 2) + 1;
+  else if (pick === "2") {
+    awayGoals =
+      1 + (seed % 3);
 
-    homeGoals = g;
-    awayGoals = g;
+    homeGoals =
+      seed % 2;
+  }
+
+  else {
+    const draw =
+      seed % 2;
+
+    homeGoals = draw;
+    awayGoals = draw;
   }
 
   homeGoals = Math.min(
     homeGoals,
-    4
+    3
   );
 
   awayGoals = Math.min(
     awayGoals,
-    4
+    3
   );
 
-  const ou =
-    homeGoals + awayGoals >= 3
-      ? "OVER"
-      : "UNDER";
+  const totalGoals =
+    homeGoals + awayGoals;
+
+  let ou = "UNDER";
+
+  if (totalGoals >= 3) {
+    ou = "OVER";
+  }
 
   return {
-    match: `${fixture.home} vs ${fixture.away}`,
+    match:
+      `${fixture.home} vs ${fixture.away}`,
+
     pick,
+
     ou,
-    score: `${homeGoals} - ${awayGoals}`,
+
+    score:
+      `${homeGoals} - ${awayGoals}`,
+
     time: fixture.date,
+
     fixtureId: fixture.id
   };
 }
@@ -252,9 +257,22 @@ function getLeaguePriority(
 
   // PREMIER LEAGUE
   if (
-    n === "premier league" ||
-    n ===
-      "england premier league"
+    (
+      n.includes(
+        "premier league"
+      ) &&
+      (
+        n.includes(
+          "england"
+        ) ||
+        n.includes(
+          "english"
+        ) ||
+        n ===
+          "premier league"
+      )
+    ) ||
+    n === "epl"
   ) {
     return 950;
   }
@@ -263,7 +281,8 @@ function getLeaguePriority(
   if (
     n === "la liga" ||
     n === "laliga" ||
-    n === "spain la liga"
+    n ===
+      "spain la liga"
   ) {
     return 930;
   }
@@ -271,7 +290,8 @@ function getLeaguePriority(
   // SERIE A
   if (
     n === "serie a" ||
-    n === "italy serie a"
+    n ===
+      "italy serie a"
   ) {
     return 920;
   }
@@ -307,12 +327,13 @@ function getLeaguePriority(
   if (
     n ===
       "uefa europa league" ||
-    n === "europa league"
+    n ===
+      "europa league"
   ) {
     return 880;
   }
 
-  // CONFERENCE
+  // CONFERENCE LEAGUE
   if (
     n ===
       "uefa europa conference league" ||
@@ -330,12 +351,21 @@ function getLeaguePriority(
     return 860;
   }
 
-  // INDONESIA
+  // LIGA INDONESIA
   if (
-    n === "liga 1" ||
-    n ===
-      "liga 1 indonesia" ||
-    n === "bri liga 1"
+    (
+      n.includes("liga 1") &&
+      (
+        n.includes(
+          "indonesia"
+        ) ||
+        n.includes("bri") ||
+        n === "liga 1"
+      )
+    ) ||
+    n.includes(
+      "indonesia super league"
+    )
   ) {
     return 850;
   }
@@ -345,7 +375,8 @@ function getLeaguePriority(
     n === "fa cup" ||
     n ===
       "coppa italia" ||
-    n === "copa del rey"
+    n ===
+      "copa del rey"
   ) {
     return 700;
   }
@@ -364,7 +395,7 @@ function groupPredictions(
     const f =
       normalizeFixture(raw);
 
-    // skip selesai
+    // skip match selesai
     if (
       [
         "FT",
@@ -450,7 +481,7 @@ function groupPredictions(
         leagueName
       );
 
-    // tidak whitelist
+    // league tidak whitelist
     if (priority <= 0) {
       continue;
     }
@@ -482,6 +513,7 @@ function groupPredictions(
   ]
     .map(
       ([league, matches]) => {
+
         matches.sort(
           (a, b) => {
             return (
@@ -962,7 +994,6 @@ export function startAutoParlayScheduler() {
     return;
   }
 
-  // clear timer lama
   if (timer) {
     clearTimeout(timer);
     timer = null;
