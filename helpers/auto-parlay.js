@@ -7,10 +7,6 @@ import {
   normalizeFixture
 } from "./football-api.js";
 
-/* =========================
-   CONFIG
-========================= */
-
 const TZ = process.env.AUTO_PARLAY_TIMEZONE || "Asia/Jakarta";
 const STATUS_FILE = "auto-parlay-status.json";
 
@@ -18,13 +14,8 @@ const DEFAULT_THUMBNAIL =
   process.env.AUTO_PARLAY_THUMBNAIL_URL ||
   "https://i.ibb.co/RTFBCzGc/image.png";
 
-/* =========================
-   PRIORITAS LIGA
-   UTAMAKAN INDONESIA + LIGA BESAR
-========================= */
-
 const PRIORITY_LEAGUES = [
-  { key:"Indonesia", names:["Liga 1","BRI Liga 1","Indonesia Liga 1","Indonesia"], score:100 },
+  { key:"Liga Indonesia", names:["Liga 1","BRI Liga 1","Indonesia Liga 1","Indonesia"], score:100 },
   { key:"Premier League", names:["Premier League","England Premier League"], score:98 },
   { key:"Champions League", names:["Champions League","UEFA Champions League"], score:97 },
   { key:"Europa League", names:["Europa League","UEFA Europa League"], score:94 },
@@ -47,12 +38,18 @@ const BLOCKED_KEYWORDS = [
   "Esoccer","E-soccer","Virtual"
 ];
 
+const BIG_TEAMS = [
+  "Persib","Persija","Persebaya","Arema","Bali United","PSM","Borneo",
+  "Manchester City","Manchester United","Liverpool","Arsenal","Chelsea","Tottenham",
+  "Real Madrid","Barcelona","Atletico Madrid",
+  "Inter","Juventus","AC Milan","Napoli","Roma",
+  "Bayern","Dortmund","Leverkusen",
+  "PSG","Marseille","Lyon",
+  "Al Nassr","Al Hilal","Inter Miami"
+];
+
 let timer = null;
 let running = false;
-
-/* =========================
-   DATE
-========================= */
 
 function nowParts(date = new Date()){
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -93,10 +90,6 @@ function nextMidnightDelay(){
   return Math.max(1000, oneDay - msToday + 1500);
 }
 
-/* =========================
-   FORMAT DATE
-========================= */
-
 function prettyDateRange(dateString){
   const monthNames = [
     "JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI",
@@ -114,9 +107,18 @@ function prettyDateRange(dateString){
   return `${String(d).padStart(2,"0")} ${monthNames[m-1]} ${y} – ${String(nd).padStart(2,"0")} ${monthNames[nm-1]} ${ny}`;
 }
 
-/* =========================
-   HASH
-========================= */
+function formatWIB(value){
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: TZ,
+    hour:"2-digit",
+    minute:"2-digit",
+    hour12:false
+  }).format(d).replace(".", ":") + " WIB";
+}
 
 function hashNum(text){
   const hex = crypto.createHash("sha256").update(String(text)).digest("hex").slice(0,8);
@@ -127,9 +129,9 @@ function clamp(num, min, max){
   return Math.max(min, Math.min(max, num));
 }
 
-/* =========================
-   LEAGUE HELPER
-========================= */
+function seededPick(seed, list){
+  return list[Math.abs(seed) % list.length];
+}
 
 function cleanLeagueName(name = ""){
   return String(name || "").trim();
@@ -157,9 +159,38 @@ function allowedLeague(name = ""){
   return !!getLeaguePriority(name);
 }
 
-/* =========================
-   AI PREDICT PREMIUM
-========================= */
+function isBigMatch(home = "", away = "", league = ""){
+  const h = String(home).toLowerCase();
+  const a = String(away).toLowerCase();
+
+  const count = BIG_TEAMS.filter(t => {
+    const x = t.toLowerCase();
+    return h.includes(x) || a.includes(x);
+  }).length;
+
+  if (count >= 2) return true;
+
+  const info = getLeaguePriority(league);
+  return count >= 1 && info && info.score >= 90;
+}
+
+function makeOdds(confidence, risk, seed){
+  let base = 2.55 - (confidence / 100);
+
+  if (risk === "SAFE") base -= 0.14;
+  if (risk === "RISKY") base += 0.18;
+
+  base += (seed % 14) / 100;
+
+  return Number(clamp(base, 1.38, 2.35).toFixed(2));
+}
+
+function makeHandicap(pick, confidence){
+  if (pick === "X") return "+0.25";
+  if (confidence >= 80) return "-0.75";
+  if (confidence >= 72) return "-0.5";
+  return "+0";
+}
 
 function predictMatch(fixture){
   const seed = hashNum(`${fixture.id}|${fixture.home}|${fixture.away}|${fixture.date}`);
@@ -167,24 +198,24 @@ function predictMatch(fixture){
   const awaySeed = hashNum(`${fixture.away}|away-power`);
   const leagueInfo = getLeaguePriority(fixture.league) || { score:70 };
 
-  const homePower = 52 + (homeSeed % 42);
-  const awayPower = 50 + (awaySeed % 42);
-  const homeBoost = 6 + (seed % 8);
-  const bigLeagueBoost = Math.round((leagueInfo.score - 70) / 5);
+  const homePower = 50 + (homeSeed % 38);
+  const awayPower = 49 + (awaySeed % 38);
+  const homeBoost = 5 + (seed % 7);
+  const leagueBoost = Math.round((leagueInfo.score - 70) / 7);
 
-  const diff = (homePower + homeBoost + bigLeagueBoost) - awayPower;
+  const diff = (homePower + homeBoost + leagueBoost) - awayPower;
 
   let pick = "X";
-  if (diff >= 10) pick = "1";
+  if (diff >= 9) pick = "1";
   else if (diff <= -8) pick = "2";
 
-  let confidence = 64 + Math.abs(diff);
-  if (pick === "X") confidence = 61 + (seed % 10);
-  confidence = clamp(confidence, 61, 92);
+  let confidence = 58 + Math.abs(diff);
+  if (pick === "X") confidence = 56 + (seed % 9);
+  confidence = clamp(confidence, 56, 84);
 
   let risk = "MEDIUM";
-  if (confidence >= 82) risk = "SAFE";
-  if (confidence < 70) risk = "RISKY";
+  if (confidence >= 76) risk = "SAFE";
+  if (confidence < 64) risk = "RISKY";
 
   let homeGoals = 1 + (seed % 3);
   let awayGoals = 1 + ((seed >> 3) % 3);
@@ -205,18 +236,26 @@ function predictMatch(fixture){
   const ou = totalGoals >= 3 ? "OVER 2.5" : "UNDER 3.5";
   const btts = homeGoals > 0 && awayGoals > 0 ? "YES" : "NO";
 
-  const doubleChance =
-    pick === "1" ? "1X" :
-    pick === "2" ? "X2" :
-    "1X";
-
-  const odds = Number((1.45 + ((100 - confidence) / 100) + ((seed % 25) / 100)).toFixed(2));
-
   let pickLabel = "Seri";
   if (pick === "1") pickLabel = fixture.home;
   if (pick === "2") pickLabel = fixture.away;
 
+  const doubleChance =
+    confidence >= 76 && pick !== "X"
+      ? pick
+      : pick === "2"
+        ? "X2"
+        : "1X";
+
+  const handicap = makeHandicap(pick, confidence);
+  const odds = makeOdds(confidence, risk, seed);
+  const bigMatch = isBigMatch(fixture.home, fixture.away, fixture.league);
+
+  const score = `${homeGoals} – ${awayGoals}`;
+  const timeWib = formatWIB(fixture.date);
+
   const analysis = buildAnalysis({
+    seed,
     home: fixture.home,
     away: fixture.away,
     league: fixture.league,
@@ -226,7 +265,10 @@ function predictMatch(fixture){
     risk,
     ou,
     btts,
-    score:`${homeGoals} – ${awayGoals}`
+    score,
+    handicap,
+    timeWib,
+    bigMatch
   });
 
   return {
@@ -237,49 +279,92 @@ function predictMatch(fixture){
     pick,
     pickLabel,
     doubleChance,
+    handicap,
     ou,
     btts,
-    score:`${homeGoals} – ${awayGoals}`,
+    score,
     confidence,
     risk,
     odds,
+    bigMatch,
     analysis,
     time:fixture.date,
+    timeWib,
     fixtureId:fixture.id
   };
 }
 
-function buildAnalysis({ home, away, league, pick, pickLabel, confidence, risk, ou, btts, score }){
+function buildAnalysis({ seed, home, away, league, pick, pickLabel, confidence, risk, ou, btts, score, handicap, timeWib, bigMatch }){
   const riskText =
     risk === "SAFE"
-      ? "masuk kategori pilihan aman karena tingkat keyakinannya cukup tinggi"
+      ? "masuk kategori aman untuk dijadikan bahan utama kombinasi parlay"
       : risk === "MEDIUM"
-        ? "masuk kategori pilihan menengah dan tetap layak dijadikan bahan pertimbangan"
-        : "masuk kategori cukup berisiko sehingga lebih cocok untuk kombinasi kecil";
+        ? "masih cukup layak, tetapi lebih pas dipadukan dengan pilihan yang lebih aman"
+        : "lebih cocok dijadikan opsi tambahan karena tingkat risikonya lebih tinggi";
 
-  const pickText =
-    pick === "X"
-      ? `Laga ${home} melawan ${away} berpotensi berjalan ketat dan hasil imbang cukup terbuka.`
-      : `${pickLabel} lebih layak diunggulkan pada laga ini melihat komposisi pertandingan dan peluang bermain lebih stabil.`;
+  const openers = [
+    `${home} dan ${away} akan bertemu dalam jadwal ${league} pukul ${timeWib}.`,
+    `Duel ${home} vs ${away} menjadi salah satu laga yang menarik untuk dipantau dari ${league}.`,
+    `Pertandingan ${league} antara ${home} melawan ${away} punya peluang menghadirkan permainan terbuka.`,
+    `${home} menghadapi ${away} dengan kondisi pertandingan yang cukup menarik untuk pasar parlay.`
+  ];
 
-  return `${pickText} Prediksi utama mengarah ke ${pickLabel} dengan confidence ${confidence}%. Untuk market gol, pilihan ${ou} terlihat cukup menarik, sedangkan BTTS mengarah ke ${btts}. Secara keseluruhan pertandingan ${league} ini ${riskText}. Perkiraan skor akhir: ${score}.`;
+  const pickTexts = {
+    "1": [
+      `${home} lebih layak diunggulkan karena memiliki peluang lebih stabil untuk menguasai jalannya laga.`,
+      `Pilihan utama mengarah ke ${home}, terutama jika melihat keuntungan bermain dan potensi serangan yang lebih hidup.`,
+      `${home} terlihat lebih solid untuk dijadikan pick utama pada pertandingan ini.`
+    ],
+    "2": [
+      `${away} punya peluang cukup baik untuk mencuri hasil positif dari laga ini.`,
+      `Arah prediksi condong ke ${away} karena peluang serangan balik dan efektivitas permainan terlihat cukup menarik.`,
+      `${away} menjadi pilihan utama dengan potensi kemenangan yang masih terbuka.`
+    ],
+    "X": [
+      `Laga ini berpotensi berjalan ketat, sehingga hasil seri cukup masuk akal.`,
+      `Kedua tim terlihat punya peluang yang seimbang, maka opsi seri menjadi pilihan yang cukup menarik.`,
+      `Pertandingan diprediksi tidak mudah untuk salah satu pihak, sehingga hasil imbang cukup terbuka.`
+    ]
+  };
+
+  const marketTexts = [
+    `Market gol mengarah ke ${ou}, sementara BTTS berada di posisi ${btts}.`,
+    `Untuk pilihan tambahan, ${ou} bisa dipertimbangkan dengan opsi BTTS ${btts}.`,
+    `Dari sisi jumlah gol, pilihan ${ou} terlihat lebih masuk, dengan BTTS ${btts}.`
+  ];
+
+  const finalTexts = [
+    `Confidence berada di angka ${confidence}% dengan handicap ${handicap}.`,
+    `Win rate estimasi ${confidence}% membuat pilihan ini ${riskText}.`,
+    `Dengan estimasi skor ${score}, pilihan ini ${riskText}.`
+  ];
+
+  const badgeText = bigMatch
+    ? " Laga ini juga masuk kategori big match sehingga cocok diberi perhatian lebih."
+    : "";
+
+  return [
+    seededPick(seed, openers),
+    seededPick(seed >> 2, pickTexts[pick]),
+    seededPick(seed >> 4, marketTexts),
+    seededPick(seed >> 6, finalTexts),
+    `Prediksi skor akhir: ${score}.${badgeText}`
+  ].join(" ");
 }
-
-/* =========================
-   GROUP
-========================= */
 
 function groupPredictions(fixtures){
   const grouped = new Map();
+  const usedFixtures = new Set();
 
   for (const raw of fixtures){
     const f = normalizeFixture(raw);
 
     if (!f || !f.league || !f.home || !f.away) continue;
+    if (usedFixtures.has(String(f.id))) continue;
 
-    if ([
-      "FT","AET","PEN","PST","CANC","ABD","AWD","WO"
-    ].includes(f.status)){
+    usedFixtures.add(String(f.id));
+
+    if (["FT","AET","PEN","PST","CANC","ABD","AWD","WO"].includes(f.status)){
       continue;
     }
 
@@ -307,6 +392,7 @@ function groupPredictions(fixtures){
   return sorted.map(([league, matches]) => {
     const sortedMatches = matches
       .sort((a,b)=>{
+        if (b.bigMatch !== a.bigMatch) return Number(b.bigMatch) - Number(a.bigMatch);
         if (b.confidence !== a.confidence) return b.confidence - a.confidence;
         return new Date(a.time).getTime() - new Date(b.time).getTime();
       })
@@ -318,10 +404,6 @@ function groupPredictions(fixtures){
     };
   }).filter(x => x.matches.length);
 }
-
-/* =========================
-   LIMIT
-========================= */
 
 function limitLeagues(predictions){
   const maxLeagues = Number(process.env.AUTO_PARLAY_MAX_LEAGUES || 8);
@@ -349,100 +431,119 @@ function limitLeagues(predictions){
   return result;
 }
 
-/* =========================
-   CONTENT PREMIUM
-========================= */
+function getAllMatches(predictions){
+  return predictions.flatMap(row => row.matches.map(m => ({
+    ...m,
+    league: row.league
+  })));
+}
 
-function contentFromPredictions(title, predictions){
-  const leagueNames = predictions.slice(0, 6).map(p => p.league).join(", ");
-  const total = predictions.reduce((sum, row) => sum + row.matches.length, 0);
-
-  const safePicks = predictions
-    .flatMap(row => row.matches.map(m => ({ ...m, league: row.league })))
-    .sort((a,b)=>b.confidence - a.confidence)
-    .slice(0, 5);
-
-  const safeRows = safePicks.map((m, i)=>`
+function makeTableRows(matches){
+  return matches.map((m, i)=>`
 <tr>
   <td>${i + 1}</td>
-  <td><strong>${m.match}</strong><br><small>${m.league}</small></td>
+  <td>
+    <strong>${m.match}</strong>
+    ${m.bigMatch ? `<br><small>🔥 Big Match</small>` : ``}
+    <br><small>${m.timeWib}</small>
+  </td>
   <td>${m.pickLabel}</td>
   <td>${m.doubleChance}</td>
-  <td>${m.ou}</td>
-  <td>${m.confidence}%</td>
-  <td>${m.risk}</td>
-</tr>`).join("");
-
-  const leagueSections = predictions.map(group => {
-    const rows = group.matches.map((m, i)=>`
-<tr>
-  <td>${i + 1}</td>
-  <td><strong>${m.match}</strong></td>
-  <td>${m.pickLabel}</td>
-  <td>${m.doubleChance}</td>
+  <td>${m.handicap}</td>
   <td>${m.ou}</td>
   <td>${m.btts}</td>
   <td>${m.score}</td>
   <td>${m.confidence}%</td>
   <td>${m.odds}</td>
+  <td>${m.risk}</td>
 </tr>`).join("");
+}
 
-    const analysis = group.matches.slice(0, 4).map(m => `
+function contentFromPredictions(title, predictions){
+  const allMatches = getAllMatches(predictions);
+  const leagueNames = predictions.slice(0, 6).map(p => p.league).join(", ");
+  const total = allMatches.length;
+
+  const safeParlay3 = allMatches
+    .filter(m => m.risk === "SAFE")
+    .sort((a,b)=>b.confidence - a.confidence)
+    .slice(0, 3);
+
+  const topConfidence = allMatches
+    .sort((a,b)=>b.confidence - a.confidence)
+    .slice(0, 8);
+
+  const bigMatches = allMatches
+    .filter(m => m.bigMatch)
+    .slice(0, 6);
+
+  const indonesiaSection = predictions.find(p => {
+    const info = getLeaguePriority(p.league);
+    return info && info.key === "Liga Indonesia";
+  });
+
+  const safeRows = makeTableRows(safeParlay3.length ? safeParlay3 : topConfidence.slice(0, 3));
+  const topRows = makeTableRows(topConfidence);
+  const bigRows = bigMatches.length ? makeTableRows(bigMatches) : "";
+
+  const indonesiaHtml = indonesiaSection ? `
+<h2>Prediksi Liga Indonesia Hari Ini</h2>
 <p>
-<strong>${m.match}</strong> — ${m.analysis}
-</p>`).join("");
+Liga Indonesia tetap menjadi prioritas utama dalam daftar prediksi hari ini. Pilihan berikut disusun agar member lebih mudah melihat laga lokal yang paling menarik untuk bahan parlay.
+</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>No</th><th>Pertandingan</th><th>Pick</th><th>DC</th><th>HDP</th><th>O/U</th><th>BTTS</th><th>Skor</th><th>Win Rate</th><th>Odds</th><th>Level</th>
+</tr>
+</thead>
+<tbody>
+${makeTableRows(indonesiaSection.matches)}
+</tbody>
+</table>
+</div>
+${indonesiaSection.matches.slice(0, 4).map(m => `<p><strong>${m.match}</strong> — ${m.analysis}</p>`).join("")}
+` : "";
 
-    return `
+  const leagueSections = predictions
+    .filter(group => group !== indonesiaSection)
+    .map(group => `
 <h2>Prediksi ${group.league}</h2>
 <div class="table-wrap">
 <table>
 <thead>
 <tr>
-  <th>No</th>
-  <th>Pertandingan</th>
-  <th>Pick</th>
-  <th>Double Chance</th>
-  <th>O/U</th>
-  <th>BTTS</th>
-  <th>Skor</th>
-  <th>Win Rate</th>
-  <th>Odds</th>
+  <th>No</th><th>Pertandingan</th><th>Pick</th><th>DC</th><th>HDP</th><th>O/U</th><th>BTTS</th><th>Skor</th><th>Win Rate</th><th>Odds</th><th>Level</th>
 </tr>
 </thead>
 <tbody>
-${rows}
+${makeTableRows(group.matches)}
 </tbody>
 </table>
 </div>
-${analysis}
-`;
-  }).join("");
+${group.matches.slice(0, 4).map(m => `<p><strong>${m.match}</strong> — ${m.analysis}</p>`).join("")}
+`).join("");
 
   return `
 <p>
-<strong>${title}</strong> menyajikan pilihan pertandingan yang lebih rapi, natural, dan fokus pada liga-liga besar serta Indonesia. Rangkuman ini dibuat untuk membantu member membaca peluang pertandingan hari ini dengan susunan pick yang lebih mudah dipahami.
+<strong>${title}</strong> menyajikan rangkuman prediksi bola hari ini dengan susunan yang lebih rapi, natural, dan fokus pada pertandingan dari Liga Indonesia serta liga-liga besar dunia.
 </p>
 
 <p>
-Total ada <strong>${total} pertandingan pilihan</strong> dari beberapa kompetisi utama seperti <strong>${leagueNames}</strong>. Setiap pertandingan dilengkapi pick utama, double chance, over/under, BTTS, estimasi skor, odds estimasi, dan confidence agar member lebih mudah memilih kombinasi parlay.
+Total tersedia <strong>${total} pertandingan pilihan</strong> dari beberapa kompetisi utama seperti <strong>${leagueNames}</strong>. Setiap laga dilengkapi pick utama, double chance, handicap, over/under, BTTS, estimasi skor, odds estimasi, jam WIB, dan win rate.
 </p>
 
-<h2>Parlay Safe Pick Hari Ini</h2>
+<h2>Safe Parlay 3 Tim Hari Ini</h2>
 <p>
-Bagian ini berisi pilihan dengan confidence paling tinggi dari seluruh pertandingan yang tersedia hari ini. Cocok dijadikan bahan utama sebelum membuat tiket parlay.
+Berikut kombinasi 3 pilihan utama dengan tingkat keyakinan paling stabil untuk bahan parlay hari ini.
 </p>
 
 <div class="table-wrap">
 <table>
 <thead>
 <tr>
-  <th>No</th>
-  <th>Pertandingan</th>
-  <th>Pick</th>
-  <th>DC</th>
-  <th>O/U</th>
-  <th>Win Rate</th>
-  <th>Level</th>
+  <th>No</th><th>Pertandingan</th><th>Pick</th><th>DC</th><th>HDP</th><th>O/U</th><th>BTTS</th><th>Skor</th><th>Win Rate</th><th>Odds</th><th>Level</th>
 </tr>
 </thead>
 <tbody>
@@ -451,18 +552,53 @@ ${safeRows}
 </table>
 </div>
 
+<h2>Top Confidence Hari Ini</h2>
+<p>
+Daftar ini berisi pilihan dengan win rate tertinggi dari seluruh pertandingan yang tersedia.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>No</th><th>Pertandingan</th><th>Pick</th><th>DC</th><th>HDP</th><th>O/U</th><th>BTTS</th><th>Skor</th><th>Win Rate</th><th>Odds</th><th>Level</th>
+</tr>
+</thead>
+<tbody>
+${topRows}
+</tbody>
+</table>
+</div>
+
+${bigRows ? `
+<h2>Big Match Pilihan</h2>
+<p>
+Beberapa laga besar hari ini memiliki perhatian lebih tinggi karena melibatkan tim populer atau kompetisi utama.
+</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>No</th><th>Pertandingan</th><th>Pick</th><th>DC</th><th>HDP</th><th>O/U</th><th>BTTS</th><th>Skor</th><th>Win Rate</th><th>Odds</th><th>Level</th>
+</tr>
+</thead>
+<tbody>
+${bigRows}
+</tbody>
+</table>
+</div>
+` : ""}
+
+${indonesiaHtml}
+
 ${leagueSections}
 
-<h2>Catatan Prediksi</h2>
+<h2>Catatan Prediksi Parlay</h2>
 <p>
-Prediksi ini adalah referensi tambahan berdasarkan susunan pertandingan, prioritas liga, pola skor, dan estimasi peluang. Tetap gunakan manajemen modal yang aman dan pilih kombinasi parlay sesuai kenyamanan masing-masing.
+Prediksi ini dibuat sebagai referensi tambahan sebelum memilih tiket parlay. Gunakan kombinasi secara bijak, pilih market yang paling nyaman, dan utamakan manajemen modal agar permainan tetap terkontrol.
 </p>
 `;
 }
-
-/* =========================
-   STATUS
-========================= */
 
 async function writeStatus(update){
   const current = await readJson(STATUS_FILE, {
@@ -496,10 +632,6 @@ async function uniqueSlugForDate(title, posts){
   return slug;
 }
 
-/* =========================
-   GET STATUS
-========================= */
-
 export async function getAutoParlayStatus(){
   return readJson(STATUS_FILE, {
     enabled: process.env.AUTO_PARLAY_ENABLED !== "false",
@@ -511,10 +643,6 @@ export async function getAutoParlayStatus(){
     nextRunAt:null
   });
 }
-
-/* =========================
-   GENERATE
-========================= */
 
 export async function generateDailyParlay({ force = false, date = null } = {}){
   if (running){
@@ -595,7 +723,7 @@ export async function generateDailyParlay({ force = false, date = null } = {}){
     const topLeague = predictions[0]?.league || "Bola";
     const title = `PREDIKSI PARLAY ${topLeague.toUpperCase()} & LIGA BESAR HARI INI ${prettyDateRange(targetDate)}`;
 
-    let rows = force
+    const rows = force
       ? posts.filter(p => !(p.autoGenerated && p.autoDate === targetDate))
       : posts;
 
@@ -603,13 +731,10 @@ export async function generateDailyParlay({ force = false, date = null } = {}){
     const content = contentFromPredictions(title, predictions);
     const now = new Date().toISOString();
 
-    const totalMatches = predictions.reduce(
-      (sum,row) => sum + row.matches.length,
-      0
-    );
+    const allMatches = getAllMatches(predictions);
+    const totalMatches = allMatches.length;
 
-    const topPicks = predictions
-      .flatMap(row => row.matches)
+    const topPicks = allMatches
       .sort((a,b)=>b.confidence - a.confidence)
       .slice(0, 5);
 
@@ -624,12 +749,13 @@ export async function generateDailyParlay({ force = false, date = null } = {}){
         "Prediksi Parlay",
         "Liga Indonesia",
         "Liga Besar",
-        "Safe Pick"
+        "Safe Pick",
+        "Big Match"
       ],
       author: process.env.AUTO_PARLAY_AUTHOR || "Master Parlay",
       thumbnail: DEFAULT_THUMBNAIL,
       excerpt: makeExcerpt(
-        `Prediksi parlay hari ini berisi ${totalMatches} pertandingan pilihan dari liga Indonesia dan liga besar lengkap dengan pick utama, double chance, over/under, BTTS, skor, odds estimasi, dan win rate.`
+        `Prediksi parlay hari ini berisi ${totalMatches} pertandingan pilihan dari Liga Indonesia dan liga besar, lengkap dengan Safe Parlay 3 Tim, big match, pick utama, double chance, handicap, over/under, BTTS, skor, odds estimasi, dan win rate.`
       ),
       content,
       published:true,
@@ -677,10 +803,6 @@ export async function generateDailyParlay({ force = false, date = null } = {}){
   }
 }
 
-/* =========================
-   START
-========================= */
-
 export function startAutoParlayScheduler(){
   if (process.env.AUTO_PARLAY_ENABLED === "false"){
     console.log("[AUTO PARLAY] disabled");
@@ -711,10 +833,6 @@ export function startAutoParlayScheduler(){
     }, 5000);
   }
 }
-
-/* =========================
-   STOP
-========================= */
 
 export function stopAutoParlayScheduler(){
   if (timer) clearTimeout(timer);
