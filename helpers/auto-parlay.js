@@ -184,12 +184,14 @@ let timer = null;
 let running = false;
 
 function blockedTeam(name = ""){
+
   const n =
     String(name || "")
       .toLowerCase()
       .trim();
 
   return (
+
     n.includes(" women") ||
     n.includes(" woman") ||
     n.includes(" female") ||
@@ -219,6 +221,7 @@ function blockedTeam(name = ""){
     n.includes(" e-soccer") ||
 
     n.includes(" virtual")
+
   );
 }
 
@@ -227,6 +230,7 @@ function cleanLeagueName(name = ""){
 }
 
 function getLeaguePriority(name = ""){
+
   const leagueName =
     cleanLeagueName(name)
       .toLowerCase();
@@ -246,11 +250,15 @@ function getLeaguePriority(name = ""){
   }
 
   return PRIORITY_LEAGUES.find(item =>
+
     item.names.some(n =>
+
       leagueName.includes(
         n.toLowerCase()
       )
+
     )
+
   ) || null;
 }
 
@@ -259,18 +267,22 @@ function allowedLeague(name = ""){
 }
 
 function isBigTeam(name = ""){
+
   const n =
     String(name)
       .toLowerCase();
 
   return BIG_TEAMS.some(team =>
+
     n.includes(
       team.toLowerCase()
     )
+
   );
 }
 
 function hashNum(text){
+
   const hex =
     crypto
       .createHash("sha256")
@@ -282,6 +294,7 @@ function hashNum(text){
 }
 
 function clamp(num, min, max){
+
   return Math.max(
     min,
     Math.min(max, num)
@@ -289,6 +302,7 @@ function clamp(num, min, max){
 }
 
 function formatWIB(value){
+
   if (!value){
     return "-";
   }
@@ -352,7 +366,9 @@ function predictMatch(fixture){
 
   if (diff >= 8){
     pick = "1";
-  } else if (diff <= -8){
+  }
+
+  else if (diff <= -8){
     pick = "2";
   }
 
@@ -384,6 +400,18 @@ function predictMatch(fixture){
     match:
       `${fixture.home} vs ${fixture.away}`,
 
+    home:
+      fixture.home,
+
+    away:
+      fixture.away,
+
+    homeLogo:
+      fixture.homeLogo,
+
+    awayLogo:
+      fixture.awayLogo,
+
     league:
       fixture.league,
 
@@ -391,8 +419,8 @@ function predictMatch(fixture){
 
     ou:
       totalGoals >= 3
-        ? "OVER"
-        : "UNDER",
+        ? "OVER 2.5"
+        : "UNDER 3.5",
 
     score:
       `${homeGoals}-${awayGoals}`,
@@ -497,67 +525,145 @@ function buildHtmlContent(predictions){
 
   return `
 
-<h2>Parlay Safe Pick Hari Ini</h2>
+<div class="prediction-wrapper">
 
-<p>
-Berikut rangkuman prediksi pertandingan pilihan hari ini dari liga utama dunia dan Liga Indonesia yang memiliki pertandingan menarik untuk dijadikan referensi parlay.
+<h2 class="prediction-title">
+Prediksi Parlay Hari Ini
+</h2>
+
+<p class="prediction-desc">
+Berikut rangkuman pertandingan pilihan dari liga besar dunia dan Liga Indonesia yang memiliki peluang menarik untuk dijadikan referensi parlay hari ini.
 </p>
 
 ${predictions.map(group => `
 
-<h2>${group.league}</h2>
+<div class="league-section">
 
-<div class="table-wrap">
+<h2 class="league-title">
+${group.league}
+</h2>
 
-<table>
-
-<thead>
-<tr>
-<th>No</th>
-<th>Pertandingan</th>
-<th>1X2</th>
-<th>O/U</th>
-<th>Skor</th>
-</tr>
-</thead>
-
-<tbody>
+<div class="match-grid">
 
 ${group.matches.map((m, i) => `
 
-<tr>
+<div class="match-card">
 
-<td>${i + 1}</td>
+<div class="match-header">
 
-<td>
-<strong>${m.match}</strong>
-<br>
-<small>${m.timeWib}</small>
-</td>
+<div class="match-number">
+#${i + 1}
+</div>
 
-<td>${m.pick}</td>
+<div class="match-time">
+${m.timeWib}
+</div>
 
-<td>${m.ou}</td>
+</div>
 
-<td>${m.score}</td>
+<div class="match-body">
 
-</tr>
+<div class="team-row">
 
-`).join("")}
+<div class="team">
 
-</tbody>
+<img
+src="${m.homeLogo}"
+alt="${m.home}"
+loading="lazy"
+/>
 
-</table>
+<span>
+${m.home}
+</span>
+
+</div>
+
+<div class="vs">
+VS
+</div>
+
+<div class="team">
+
+<img
+src="${m.awayLogo}"
+alt="${m.away}"
+loading="lazy"
+/>
+
+<span>
+${m.away}
+</span>
+
+</div>
+
+</div>
+
+<div class="prediction-boxes">
+
+<div class="pred-box">
+
+<small>
+1X2
+</small>
+
+<strong>
+${m.pick}
+</strong>
+
+</div>
+
+<div class="pred-box">
+
+<small>
+O/U
+</small>
+
+<strong>
+${m.ou}
+</strong>
+
+</div>
+
+<div class="pred-box">
+
+<small>
+SKOR
+</small>
+
+<strong>
+${m.score}
+</strong>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
 `).join("")}
 
-<h2>Catatan Prediksi</h2>
+</div>
+
+</div>
+
+`).join("")}
+
+<div class="prediction-note">
+
+<h3>
+Catatan Prediksi
+</h3>
 
 <p>
-Prediksi ini dibuat sebagai tambahan referensi sebelum menentukan pilihan pertandingan. Gunakan manajemen modal dengan baik dan tetap bermain secara bijak.
+Prediksi ini dibuat sebagai tambahan referensi sebelum menentukan pilihan pertandingan. Tetap gunakan manajemen modal dengan baik dan bermain secara bijak.
 </p>
+
+</div>
+
+</div>
 
 `;
 }
