@@ -116,6 +116,38 @@ const PRIORITY_LEAGUES = [
   }
 ];
 
+const BIG_TEAMS = [
+  "Persib",
+  "Persija",
+  "Persebaya",
+  "PSM",
+  "Bali United",
+  "Arema",
+  "Borneo",
+  "Manchester City",
+  "Manchester United",
+  "Liverpool",
+  "Arsenal",
+  "Chelsea",
+  "Tottenham",
+  "Real Madrid",
+  "Barcelona",
+  "Atletico Madrid",
+  "Inter",
+  "Juventus",
+  "AC Milan",
+  "Napoli",
+  "Roma",
+  "Bayern",
+  "Dortmund",
+  "Leverkusen",
+  "PSG",
+  "Marseille",
+  "Lyon",
+  "Al Nassr",
+  "Al Hilal"
+];
+
 const BLOCKED_KEYWORDS = [
   "Women",
   "Woman",
@@ -226,6 +258,18 @@ function allowedLeague(name = ""){
   return !!getLeaguePriority(name);
 }
 
+function isBigTeam(name = ""){
+  const n =
+    String(name)
+      .toLowerCase();
+
+  return BIG_TEAMS.some(team =>
+    n.includes(
+      team.toLowerCase()
+    )
+  );
+}
+
 function hashNum(text){
   const hex =
     crypto
@@ -273,16 +317,33 @@ function formatWIB(value){
 }
 
 function predictMatch(fixture){
+
   const seed =
     hashNum(
       `${fixture.id}|${fixture.home}|${fixture.away}`
     );
 
-  const homePower =
+  let homePower =
     55 + (seed % 20);
 
-  const awayPower =
+  let awayPower =
     50 + ((seed >> 2) % 20);
+
+  if (isBigTeam(fixture.home)){
+    homePower += 10;
+  }
+
+  if (isBigTeam(fixture.away)){
+    awayPower += 10;
+  }
+
+  if (
+    fixture.league
+      .toLowerCase()
+      .includes("indonesia")
+  ){
+    homePower += 5;
+  }
 
   const diff =
     homePower - awayPower;
@@ -300,13 +361,6 @@ function predictMatch(fixture){
 
   confidence =
     clamp(confidence, 52, 78);
-
-  const risk =
-    confidence >= 72
-      ? "SAFE"
-      : confidence >= 63
-        ? "MEDIUM"
-        : "RISKY";
 
   const homeGoals =
     pick === "1"
@@ -326,66 +380,40 @@ function predictMatch(fixture){
     homeGoals + awayGoals;
 
   return {
+
     match:
       `${fixture.home} vs ${fixture.away}`,
 
-    league:fixture.league,
+    league:
+      fixture.league,
 
     pick,
-
-    pickLabel:
-      pick === "1"
-        ? fixture.home
-        : pick === "2"
-          ? fixture.away
-          : "Seri",
-
-    doubleChance:
-      pick === "2"
-        ? "X2"
-        : "1X",
-
-    handicap:
-      confidence >= 72
-        ? "-0.5"
-        : "0",
 
     ou:
       totalGoals >= 3
         ? "OVER 2.5"
         : "UNDER 3.5",
 
-    btts:
-      homeGoals > 0 &&
-      awayGoals > 0
-        ? "YES"
-        : "NO",
-
     score:
-      `${homeGoals} - ${awayGoals}`,
-
-    confidence,
-
-    risk,
-
-    odds:
-      confidence >= 72
-        ? 1.55
-        : 1.95,
+      `${homeGoals}-${awayGoals}`,
 
     time:
       fixture.date,
 
     timeWib:
-      formatWIB(fixture.date)
+      formatWIB(fixture.date),
+
+    confidence
   };
 }
 
 function groupPredictions(fixtures){
+
   const grouped =
     new Map();
 
   for (const raw of fixtures){
+
     const f =
       normalizeFixture(raw);
 
@@ -434,43 +462,71 @@ function groupPredictions(fixtures){
   }
 
   return [...grouped.entries()]
+    .sort((a,b)=>{
+
+      const ap =
+        getLeaguePriority(a[0])
+          ?.score || 0;
+
+      const bp =
+        getLeaguePriority(b[0])
+          ?.score || 0;
+
+      return bp - ap;
+
+    })
     .map(([league, matches]) => ({
+
       league,
-      matches
+
+      matches:
+        matches
+          .sort((a,b)=>
+            b.confidence -
+            a.confidence
+          )
+          .slice(0, 10)
+
     }))
-    .filter(x => x.matches.length);
+    .filter(x =>
+      x.matches.length
+    );
 }
 
 function buildHtmlContent(predictions){
+
   return `
+
 <h2>Parlay Safe Pick Hari Ini</h2>
 
 <p>
-Berikut rangkuman prediksi pertandingan pilihan hari ini dari beberapa liga utama yang sudah difilter lebih rapi dan fokus pada pertandingan yang lebih layak dijadikan pilihan parlay.
+Berikut rangkuman prediksi pertandingan pilihan hari ini dari liga utama dunia dan Liga Indonesia yang memiliki pertandingan menarik untuk dijadikan referensi parlay.
 </p>
 
 ${predictions.map(group => `
+
 <h2>${group.league}</h2>
 
 <div class="table-wrap">
+
 <table>
+
 <thead>
 <tr>
 <th>No</th>
 <th>Pertandingan</th>
-<th>Pick</th>
-<th>DC</th>
+<th>1X2</th>
 <th>O/U</th>
 <th>Skor</th>
-<th>Win Rate</th>
-<th>Level</th>
 </tr>
 </thead>
 
 <tbody>
 
 ${group.matches.map((m, i) => `
+
 <tr>
+
 <td>${i + 1}</td>
 
 <td>
@@ -479,48 +535,46 @@ ${group.matches.map((m, i) => `
 <small>${m.timeWib}</small>
 </td>
 
-<td>${m.pickLabel}</td>
-
-<td>${m.doubleChance}</td>
+<td>${m.pick}</td>
 
 <td>${m.ou}</td>
 
 <td>${m.score}</td>
 
-<td>${m.confidence}%</td>
-
-<td>${m.risk}</td>
 </tr>
+
 `).join("")}
 
 </tbody>
-</table>
-</div>
 
-${group.matches.slice(0,3).map(m => `
-<p>
-<strong>${m.match}</strong> diprediksi menjadi salah satu pertandingan menarik di ${group.league}. Pilihan utama mengarah ke <strong>${m.pickLabel}</strong> dengan estimasi skor <strong>${m.score}</strong> dan confidence sekitar <strong>${m.confidence}%</strong>.
-</p>
-`).join("")}
+</table>
+
+</div>
 
 `).join("")}
 
 <h2>Catatan Prediksi</h2>
 
 <p>
-Prediksi ini dibuat sebagai referensi tambahan sebelum menentukan pilihan parlay. Tetap gunakan manajemen modal dengan baik dan hindari bermain berlebihan.
+Prediksi ini dibuat sebagai tambahan referensi sebelum menentukan pilihan pertandingan. Gunakan manajemen modal dengan baik dan tetap bermain secara bijak.
 </p>
+
 `;
 }
 
 export async function getAutoParlayStatus(){
-  return readJson(STATUS_FILE, {
-    enabled:true,
-    running:false
-  });
+
+  return readJson(
+    STATUS_FILE,
+    {
+      enabled:true,
+      running:false
+    }
+  );
 }
 
 export async function generateDailyParlay(){
+
   if (running){
     return;
   }
@@ -541,6 +595,7 @@ export async function generateDailyParlay(){
       await getFixturesByDate(date);
 
     if (!apiResult.ok){
+
       throw new Error(
         apiResult.error
       );
@@ -587,7 +642,7 @@ export async function generateDailyParlay(){
 
       excerpt:
         makeExcerpt(
-          "Prediksi bola hari ini lengkap dengan safe pick, big match, over under, BTTS, dan confidence pilihan."
+          "Prediksi bola hari ini lengkap dengan pertandingan pilihan dari liga besar dunia dan Liga Indonesia."
         ),
 
       content,
@@ -615,9 +670,12 @@ export async function generateDailyParlay(){
     );
 
     await writeStatus({
+
       running:false,
+
       lastSuccessAt:
         now.toISOString()
+
     });
 
     return {
@@ -627,9 +685,12 @@ export async function generateDailyParlay(){
   } catch (err){
 
     await writeStatus({
+
       running:false,
+
       lastError:
         err.message
+
     });
 
     return {
