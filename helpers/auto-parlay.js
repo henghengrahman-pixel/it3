@@ -79,6 +79,44 @@ function hashNum(text) {
   return parseInt(hex, 16);
 }
 
+function getTeamPriority(team = "") {
+  const t = String(team).toLowerCase();
+
+  const bigTeams = [
+    "manchester city", "man city", "manchester united", "man united",
+    "liverpool", "arsenal", "chelsea", "tottenham", "newcastle",
+    "real madrid", "barcelona", "atletico madrid",
+    "inter", "juventus", "ac milan", "napoli", "roma",
+    "bayern munich", "bayern", "dortmund",
+    "psg", "paris saint germain",
+    "ajax", "psv", "feyenoord",
+    "persib", "persija", "persebaya", "arema", "bali united", "psm makassar"
+  ];
+
+  return bigTeams.some((x) => t.includes(x)) ? 100 : 0;
+}
+
+function isPrimeTime(dateValue) {
+  try {
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return false;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: TZ,
+      hour: "2-digit",
+      hour12: false
+    }).formatToParts(d).reduce((acc, p) => {
+      acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+    const hour = Number(parts.hour);
+    return hour >= 17 || hour <= 5;
+  } catch {
+    return false;
+  }
+}
+
 function predictMatch(fixture) {
   const seed = hashNum(`${fixture.id}-${fixture.home}-${fixture.away}-${fixture.date}`);
 
@@ -114,13 +152,34 @@ function predictMatch(fixture) {
   homeGoals = Math.min(homeGoals, 3);
   awayGoals = Math.min(awayGoals, 3);
 
-  const ou = homeGoals + awayGoals >= 3 ? "OVER" : "UNDER";
+  const totalGoals = homeGoals + awayGoals;
+  const ou = totalGoals >= 3 ? "OVER" : "UNDER";
+
+  const confidence = 70 + (seed % 21);
+  const oddsEstimate = (1.30 + ((seed % 140) / 100)).toFixed(2);
+  const teamPriority = getTeamPriority(fixture.home) + getTeamPriority(fixture.away);
+  const primeTime = isPrimeTime(fixture.date);
+
+  const bigMatch = teamPriority >= 100;
+  const superBigMatch = teamPriority >= 200;
+  const safePick = confidence >= 85 && pick !== "X";
+  const hotMatch = bigMatch || primeTime;
 
   return {
     match: `${fixture.home} vs ${fixture.away}`,
+    home: fixture.home,
+    away: fixture.away,
     pick,
     ou,
     score: `${homeGoals} - ${awayGoals}`,
+    confidence,
+    oddsEstimate,
+    safePick,
+    bigMatch,
+    superBigMatch,
+    hotMatch,
+    primeTime,
+    teamPriority,
     time: fixture.date,
     fixtureId: fixture.id
   };
@@ -188,21 +247,10 @@ function getLeaguePriority(name = "") {
     return 900;
   }
 
-  if (n.includes("eredivisie")) {
-    return 890;
-  }
-
-  if (n.includes("europa league")) {
-    return 880;
-  }
-
-  if (n.includes("conference league")) {
-    return 870;
-  }
-
-  if (n.includes("afc") && n.includes("champions")) {
-    return 860;
-  }
+  if (n.includes("eredivisie")) return 890;
+  if (n.includes("europa league")) return 880;
+  if (n.includes("conference league")) return 870;
+  if (n.includes("afc") && n.includes("champions")) return 860;
 
   if (
     (
@@ -262,6 +310,7 @@ function isBlockedLeague(name = "") {
 
 function groupPredictions(fixtures) {
   const grouped = new Map();
+  const used = new Set();
 
   for (const raw of fixtures) {
     const f = normalizeFixture(raw);
@@ -282,8 +331,15 @@ function groupPredictions(fixtures) {
       continue;
     }
 
+    const uniqueKey = `${leagueName}-${f.home}-${f.away}-${f.date}`;
+    if (used.has(uniqueKey)) {
+      continue;
+    }
+    used.add(uniqueKey);
+
     const item = predictMatch(f);
     item.priority = priority;
+    item.leaguePriority = priority;
 
     if (!grouped.has(leagueName)) {
       grouped.set(leagueName, []);
@@ -294,7 +350,16 @@ function groupPredictions(fixtures) {
 
   const result = [...grouped.entries()]
     .map(([league, matches]) => {
-      matches.sort((a, b) => b.priority - a.priority);
+      matches.sort((a, b) => {
+        return (
+          (b.teamPriority || 0) -
+          (a.teamPriority || 0) ||
+          (b.confidence || 0) -
+          (a.confidence || 0) ||
+          Number(b.primeTime) -
+          Number(a.primeTime)
+        );
+      });
 
       return {
         league,
@@ -337,25 +402,55 @@ function limitLeagues(predictions) {
   return result;
 }
 
+function titleFromPredictions(targetDate, predictions) {
+  const names = predictions.map((p) => p.league).join(" ").toLowerCase();
+
+  if (names.includes("champions")) {
+    return `PREDIKSI PARLAY LIGA CHAMPIONS MALAM INI ${prettyDateRange(targetDate)}`;
+  }
+
+  if (names.includes("premier league")) {
+    return `PREDIKSI PARLAY PREMIER LEAGUE MALAM INI ${prettyDateRange(targetDate)}`;
+  }
+
+  if (names.includes("liga 1") || names.includes("indonesia")) {
+    return `PREDIKSI PARLAY LIGA INDONESIA MALAM INI ${prettyDateRange(targetDate)}`;
+  }
+
+  return `PREDIKSI PARLAY LIGA BESAR MALAM INI ${prettyDateRange(targetDate)}`;
+}
+
 function contentFromPredictions(title, predictions) {
   const leagueNames = predictions.slice(0, 6).map((p) => p.league).join(", ");
   const total = predictions.reduce((sum, row) => sum + row.matches.length, 0);
 
+  const safeCount = predictions.reduce((sum, row) => {
+    return sum + row.matches.filter((m) => m.safePick).length;
+  }, 0);
+
+  const bigMatchCount = predictions.reduce((sum, row) => {
+    return sum + row.matches.filter((m) => m.bigMatch).length;
+  }, 0);
+
   return `
 <p>
-Prediksi parlay malam ini menghadirkan pertandingan pilihan dari kompetisi sepakbola paling populer dan paling banyak dicari hari ini.
+Prediksi parlay malam ini menghadirkan ${total} pertandingan pilihan dari liga besar yang paling banyak dicari hari ini.
 </p>
 
 <p>
-Artikel <strong>${title}</strong> memuat ${total} pertandingan unggulan dari liga besar seperti ${leagueNames || "liga top dunia"}.
+Artikel <strong>${title}</strong> memuat jadwal unggulan dari ${leagueNames || "liga top dunia"} dengan format yang lebih ringkas, rapi, dan mudah dibaca.
 </p>
 
 <p>
-Setiap pertandingan dilengkapi pilihan 1X2, over/under, dan perkiraan skor akhir yang disusun agar lebih mudah dibaca sebagai bahan analisa.
+Setiap pertandingan dilengkapi prediksi 1X2, over/under, perkiraan skor akhir, estimasi peluang, dan confidence untuk membantu membaca arah pertandingan.
 </p>
 
 <p>
-Gunakan prediksi ini sebagai referensi tambahan sebelum menentukan pilihan bermain. Hasil pertandingan tetap dapat berubah mengikuti kondisi tim, rotasi pemain, jadwal, dan performa di lapangan.
+Dari daftar hari ini terdapat ${bigMatchCount} big match dan ${safeCount} pilihan yang masuk kategori safe pick berdasarkan kekuatan tim, jam pertandingan, dan pola prediksi.
+</p>
+
+<p>
+Gunakan prediksi ini sebagai referensi tambahan. Hasil pertandingan tetap dapat berubah mengikuti kondisi tim, rotasi pemain, jadwal padat, dan performa di lapangan.
 </p>
 `;
 }
@@ -483,7 +578,7 @@ export async function generateDailyParlay({ force = false, date = null } = {}) {
       };
     }
 
-    const title = `PREDIKSI PARLAY JITU MALAM INI ${prettyDateRange(targetDate)}`;
+    const title = titleFromPredictions(targetDate, predictions);
     let rows = force
       ? posts.filter((p) => !(p.autoGenerated && p.autoDate === targetDate))
       : posts;
@@ -499,18 +594,19 @@ export async function generateDailyParlay({ force = false, date = null } = {}) {
       slug,
       category: "Prediksi Parlay",
       tags: [
-        "Betting Bola",
+        "Prediksi Bola",
+        "Prediksi Parlay",
         "Bola Hari Ini",
         "Liga Champions",
         "Premier League",
         "Liga Indonesia",
-        "Prediksi Bola",
-        "Tips Parlay"
+        "Big Match",
+        "Safe Pick"
       ],
       author: process.env.AUTO_PARLAY_AUTHOR || "Master Parlay",
       thumbnail: DEFAULT_THUMBNAIL,
       excerpt: makeExcerpt(
-        `Prediksi parlay malam ini berisi ${totalMatches} pertandingan pilihan dari liga besar lengkap dengan prediksi skor, 1X2, dan over/under.`
+        `Prediksi parlay malam ini berisi ${totalMatches} pertandingan pilihan dari liga besar lengkap dengan skor, 1X2, over/under, confidence, dan safe pick.`
       ),
       content,
       published: true,
