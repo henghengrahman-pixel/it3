@@ -1,126 +1,32 @@
-body.body-parlay{
-  background:#eef1f5!important;
-  color:#101010!important;
-}
-
-body.body-parlay .topbar{
-  background:#0f172a;
-  color:#fff;
-}
-
-body.body-parlay .ticker{
-  background:#fff;
-  border-radius:0;
-  border-left:0;
-  border-right:0;
-  box-shadow:none;
-  color:#111;
-}
-
-body.body-parlay .ticker span{
-  color:#111;
-}
-
-body.body-parlay .footer{
-  background:#0f172a;
-  color:#d8d8e8;
-  padding:40px 0;
-  margin:50px 0 0;
-}
-
-body.body-parlay .authbar{
-  margin-top:14px;
-  margin-bottom:10px;
-}
-
-.parlay-layout{
+.parlay-single-layout{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 320px;
+  grid-template-columns:
+    minmax(0,1fr) 320px;
   gap:28px;
   align-items:start;
-  margin-top:34px;
+  margin-top:30px;
 }
 
 .parlay-single{
   background:#fff;
-  border-radius:24px;
-  padding:34px;
+  border-radius:22px;
+  padding:28px;
   border:1px solid #e5e7eb;
-  box-shadow:
-    0 10px 40px rgba(0,0,0,.06);
 }
 
 .parlay-single h1{
-  font-size:42px;
-  line-height:1.2;
-  margin:18px 0 24px;
+  font-size:38px;
+  line-height:1.25;
   font-weight:900;
   color:#111827;
+  margin:18px 0 22px;
 }
 
-.single-cover{
+.parlay-single .single-cover{
   width:100%;
-  border-radius:22px;
-  overflow:hidden;
-  margin:0 0 28px;
-  object-fit:cover;
-  max-height:520px;
-  border:1px solid #e5e7eb;
-}
-
-.single-meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-  font-size:13px;
-  color:#6b7280;
-  margin-bottom:18px;
-}
-
-.single-meta strong{
-  color:#111827;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:#dc2626;
-  color:#fff!important;
-  border-radius:999px;
-  padding:8px 14px;
-  font-size:12px;
-  font-weight:800;
-  text-transform:uppercase;
-  text-decoration:none;
-  letter-spacing:.4px;
-}
-
-.article-content{
-  font-size:17px;
-  line-height:1.9;
-  color:#111827;
-}
-
-.article-content p{
-  margin:0 0 24px;
-}
-
-.article-content h2{
-  font-size:30px;
-  line-height:1.3;
-  margin:40px 0 18px;
-  color:#111827;
-  font-weight:900;
-}
-
-.article-content h3{
-  font-size:24px;
-  line-height:1.3;
-  margin:30px 0 16px;
-  color:#111827;
-  font-weight:800;
+  border-radius:18px;
+  margin-bottom:28px;
+  display:block;
 }
 
 .prediction-section{
@@ -128,59 +34,56 @@ body.body-parlay .authbar{
 }
 
 .prediction-header{
-  margin-bottom:28px;
+  margin-bottom:24px;
 }
 
 .prediction-header h2{
   font-size:34px;
   font-weight:900;
   color:#111827;
-  margin:0 0 12px;
+  margin-bottom:10px;
 }
 
 .prediction-header p{
-  font-size:16px;
-  line-height:1.8;
+  font-size:15px;
   color:#4b5563;
+  line-height:1.8;
 }
 
 .prediction-table-wrap{
-  margin-bottom:42px;
+  margin-bottom:40px;
 }
 
 .league-title{
   font-size:32px!important;
   font-weight:900!important;
-  color:#111827!important;
   margin-bottom:18px!important;
+  color:#111827!important;
 }
 
 .prediksi-table{
   width:100%;
   border-collapse:collapse;
   background:#fff;
-  border:1px solid #e5e7eb;
 }
 
-.prediksi-table thead tr:first-child{
-  background:#f8fafc;
+.prediksi-table th,
+.prediksi-table td{
+  border:1px solid #e5e7eb;
 }
 
 .prediksi-table thead th{
-  border:1px solid #e5e7eb;
+  background:#f8fafc;
   padding:16px;
-  font-size:16px;
-  color:#111827;
+  font-size:15px;
   font-weight:800;
+  color:#111827;
   text-align:left;
 }
 
 .prediksi-table tbody td{
-  border:1px solid #e5e7eb;
   padding:18px 14px;
   vertical-align:middle;
-  font-size:15px;
-  color:#111827;
 }
 
 .match-team-col{
@@ -203,29 +106,27 @@ body.body-parlay .authbar{
   width:38px;
   height:38px;
   object-fit:contain;
-  flex-shrink:0;
 }
 
 .team-row span{
-  font-size:17px;
-  line-height:1.5;
+  font-size:16px;
   font-weight:800;
   color:#111827;
+  line-height:1.5;
 }
 
 .vs-text{
-  font-size:12px;
+  margin-left:50px;
+  font-size:11px;
   font-weight:900;
   color:#9ca3af;
-  margin-left:50px;
-  letter-spacing:1px;
 }
 
 .match-time{
   margin-left:50px;
-  font-size:12px;
-  color:#6b7280;
+  font-size:11px;
   font-weight:700;
+  color:#6b7280;
 }
 
 .prediksi-table tbody td:nth-child(2),
@@ -235,7 +136,7 @@ body.body-parlay .authbar{
   width:15%;
 }
 
-.prediksi-table tbody td strong{
+.prediksi-table strong{
   font-size:18px;
   font-weight:900;
 }
@@ -250,53 +151,32 @@ body.body-parlay .authbar{
 
 .parlay-note{
   margin-top:40px;
-  background:#f8fafc;
+  padding:22px;
   border-radius:18px;
-  padding:24px;
+  background:#f8fafc;
   border:1px solid #e5e7eb;
 }
 
-.parlay-note p{
-  margin:0 0 12px;
-  color:#374151;
-  line-height:1.8;
-}
-
-.parlay-note p:last-child{
-  margin-bottom:0;
-}
-
 .related{
-  margin-top:42px;
-  padding-top:28px;
-  border-top:1px solid #e5e7eb;
-}
-
-.related h3{
-  font-size:24px;
-  font-weight:900;
-  color:#111827;
-  margin:0 0 20px;
+  margin-top:40px;
 }
 
 .related-grid{
   display:grid;
   grid-template-columns:
     repeat(3,minmax(0,1fr));
-  gap:16px;
+  gap:14px;
 }
 
 .related-grid a{
   display:block;
+  padding:16px;
+  border-radius:14px;
   background:#f8fafc;
   border:1px solid #e5e7eb;
-  border-radius:18px;
-  padding:18px;
   text-decoration:none;
   color:#111827;
-  font-weight:800;
-  line-height:1.5;
-  transition:.2s ease;
+  font-weight:700;
 }
 
 .related-grid a:hover{
@@ -304,86 +184,28 @@ body.body-parlay .authbar{
   color:#fff;
 }
 
-.blog-sidebar{
-  display:grid;
-  gap:24px;
-}
-
-.widget{
-  background:#fff!important;
-  border-radius:22px;
-  padding:24px;
-  border:1px solid #e5e7eb;
-  box-shadow:
-    0 6px 20px rgba(0,0,0,.05);
-}
-
-.widget-title{
-  font-size:20px;
-  font-weight:900;
-  color:#111827;
-  margin:0 0 18px;
-}
-
-.side-link{
-  display:block;
-  padding:14px 0;
-  border-bottom:1px solid #edf2f7;
-  text-decoration:none;
-  color:#111827!important;
-  font-weight:700;
-  line-height:1.5;
-}
-
-.side-link:last-child{
-  border-bottom:none;
-}
-
-.side-link:hover{
-  color:#dc2626!important;
-}
-
-.ad-box{
-  display:block;
-  overflow:hidden;
-  border-radius:18px;
-}
-
-.ad-box img{
-  width:100%;
-  display:block;
-}
-
 @media(max-width:980px){
 
-  .parlay-layout{
+  .parlay-single-layout{
     grid-template-columns:1fr;
   }
 
   .blog-sidebar{
     display:none;
   }
-
-  .parlay-single{
-    padding:26px 20px;
-  }
-
-  .parlay-single h1{
-    font-size:32px;
-  }
-
-  .prediction-header h2{
-    font-size:28px;
-  }
-
-  .related-grid{
-    grid-template-columns:1fr;
-  }
 }
 
 @media(max-width:768px){
 
-  .prediction-heading{
+  .parlay-single{
+    padding:20px 14px;
+  }
+
+  .parlay-single h1{
+    font-size:28px;
+  }
+
+  .prediction-header h2{
     font-size:26px;
   }
 
@@ -398,11 +220,6 @@ body.body-parlay .authbar{
 
   .prediksi-table tbody td{
     padding:12px 6px;
-    font-size:12px;
-  }
-
-  .team-row{
-    gap:8px;
   }
 
   .team-row img{
@@ -412,54 +229,19 @@ body.body-parlay .authbar{
 
   .team-row span{
     font-size:12px;
-    line-height:1.4;
   }
 
-  .match-time{
-    margin-left:34px;
-    font-size:10px;
-  }
-
+  .match-time,
   .vs-text{
     margin-left:34px;
     font-size:10px;
   }
 
-  .prediksi-table tbody td strong{
+  .prediksi-table strong{
     font-size:13px;
   }
-}
 
-@media(max-width:680px){
-
-  .parlay-single{
-    border-radius:18px;
-    padding:22px 14px;
-  }
-
-  .parlay-single h1{
-    font-size:26px;
-    line-height:1.35;
-  }
-
-  .single-cover{
-    border-radius:16px;
-  }
-
-  .article-content{
-    font-size:15px;
-    line-height:1.8;
-  }
-
-  .article-content h2{
-    font-size:24px;
-  }
-
-  .article-content h3{
-    font-size:20px;
-  }
-
-  .league-title{
-    font-size:22px!important;
+  .related-grid{
+    grid-template-columns:1fr;
   }
 }
