@@ -2,9 +2,12 @@ import crypto from "crypto";
 import { readJson, writeJson } from "./json-db.js";
 import { getPosts, savePosts } from "./store.js";
 import { slugify, makeExcerpt } from "./slug.js";
+
 import {
   getFixturesByDate,
-  normalizeFixture
+  normalizeFixture,
+  getPredictionByFixture,
+  normalizePrediction
 } from "./football-api.js";
 
 const TZ =
@@ -23,6 +26,7 @@ const DEFAULT_AUTHOR =
   "Master Parlay";
 
 const PRIORITY_LEAGUES = [
+
   {
     key:"Liga Indonesia",
     names:[
@@ -105,39 +109,11 @@ const PRIORITY_LEAGUES = [
     ],
     score:88
   }
-];
 
-const BIG_TEAMS = [
-  "Persib",
-  "Persija",
-  "Persebaya",
-  "PSM",
-  "Bali United",
-  "Arema",
-  "Borneo",
-  "Manchester City",
-  "Manchester United",
-  "Liverpool",
-  "Arsenal",
-  "Chelsea",
-  "Tottenham",
-  "Real Madrid",
-  "Barcelona",
-  "Atletico Madrid",
-  "Inter",
-  "Juventus",
-  "AC Milan",
-  "Napoli",
-  "Roma",
-  "Bayern",
-  "Dortmund",
-  "Leverkusen",
-  "PSG",
-  "Al Nassr",
-  "Al Hilal"
 ];
 
 const BLOCKED_KEYWORDS = [
+
   "Women",
   "Woman",
   "Female",
@@ -167,6 +143,7 @@ const BLOCKED_KEYWORDS = [
   "Esoccer",
   "E-soccer",
   "Virtual"
+
 ];
 
 let timer = null;
@@ -229,11 +206,15 @@ function getLeaguePriority(name = ""){
   }
 
   if (
+
     BLOCKED_KEYWORDS.some(keyword =>
+
       leagueName.includes(
         keyword.toLowerCase()
       )
+
     )
+
   ){
     return null;
   }
@@ -255,41 +236,6 @@ function allowedLeague(name = ""){
   return !!getLeaguePriority(name);
 }
 
-function isBigTeam(name = ""){
-
-  const n =
-    String(name)
-      .toLowerCase();
-
-  return BIG_TEAMS.some(team =>
-
-    n.includes(
-      team.toLowerCase()
-    )
-
-  );
-}
-
-function hashNum(text){
-
-  const hex =
-    crypto
-      .createHash("sha256")
-      .update(String(text))
-      .digest("hex")
-      .slice(0, 8);
-
-  return parseInt(hex, 16);
-}
-
-function clamp(num, min, max){
-
-  return Math.max(
-    min,
-    Math.min(max, num)
-  );
-}
-
 function formatWIB(value){
 
   if (!value){
@@ -309,72 +255,66 @@ function formatWIB(value){
 
   return (
     new Intl.DateTimeFormat("id-ID", {
+
       timeZone: TZ,
+
       hour:"2-digit",
+
       minute:"2-digit",
+
       hour12:false
+
     })
     .format(d)
     .replace(".", ":")
+
   ) + " WIB";
 }
 
-function predictMatch(fixture){
+async function predictMatch(fixture){
 
-  const seed =
-    hashNum(
-      `${fixture.id}|${fixture.home}|${fixture.away}`
+  const predictionResult =
+    await getPredictionByFixture(
+      fixture.id
     );
 
-  let homePower =
-    55 + (seed % 20);
+  if (
 
-  let awayPower =
-    50 + ((seed >> 2) % 20);
+    !predictionResult.ok ||
 
-  if (isBigTeam(fixture.home)){
-    homePower += 10;
+    !predictionResult.prediction
+
+  ){
+
+    return null;
   }
 
-  if (isBigTeam(fixture.away)){
-    awayPower += 10;
-  }
+  const normalized =
+    normalizePrediction(
+      predictionResult.prediction
+    );
 
-  const diff =
-    homePower - awayPower;
+  const percentHome =
+    normalized.percentHome || "";
 
-  let pick = "X";
+  const percentDraw =
+    normalized.percentDraw || "";
 
-  if (diff >= 8){
-    pick = "1";
-  }
+  const percentAway =
+    normalized.percentAway || "";
 
-  else if (diff <= -8){
-    pick = "2";
-  }
+  const confidenceMap = {
 
-  const homeGoals =
-    pick === "1"
-      ? 2
-      : pick === "2"
-        ? 1
-        : 1;
+    "1":
+      parseInt(percentHome) || 60,
 
-  const awayGoals =
-    pick === "2"
-      ? 2
-      : pick === "1"
-        ? 1
-        : 1;
+    "X":
+      parseInt(percentDraw) || 55,
 
-  const totalGoals =
-    homeGoals + awayGoals;
+    "2":
+      parseInt(percentAway) || 60
 
-  let confidence =
-    60 + Math.abs(diff);
-
-  confidence =
-    clamp(confidence, 52, 78);
+  };
 
   return {
 
@@ -393,27 +333,38 @@ function predictMatch(fixture){
     league:
       fixture.league,
 
-    pick,
+    pick:
+      normalized.pick || "X",
 
     ou:
-      totalGoals >= 3
-        ? "OVER"
-        : "UNDER",
+      normalized.underOver || "UNDER 2.5",
 
     score:
-      `${homeGoals} - ${awayGoals}`,
+      normalized.score || "1 - 1",
+
+    percentHome,
+
+    percentDraw,
+
+    percentAway,
 
     time:
       fixture.date,
 
     timeWib:
-      formatWIB(fixture.date),
+      formatWIB(
+        fixture.date
+      ),
 
-    confidence
+    confidence:
+      confidenceMap[
+        normalized.pick
+      ] || 60
+
   };
 }
 
-function groupPredictions(fixtures){
+async function groupPredictions(fixtures){
 
   const grouped =
     new Map();
@@ -451,7 +402,11 @@ function groupPredictions(fixtures){
     }
 
     const prediction =
-      predictMatch(f);
+      await predictMatch(f);
+
+    if (!prediction){
+      continue;
+    }
 
     if (
       !grouped.has(f.league)
@@ -468,6 +423,7 @@ function groupPredictions(fixtures){
   }
 
   return [...grouped.entries()]
+
     .sort((a,b)=>{
 
       const ap =
@@ -481,6 +437,7 @@ function groupPredictions(fixtures){
       return bp - ap;
 
     })
+
     .map(([league, matches]) => ({
 
       league,
@@ -494,6 +451,7 @@ function groupPredictions(fixtures){
           .slice(0, 10)
 
     }))
+
     .filter(x =>
       x.matches.length
     );
@@ -530,16 +488,6 @@ ${group.league}
 <th>
 ${group.league}
 </th>
-
-<th colspan="3">
-Prediksi
-</th>
-
-</tr>
-
-<tr>
-
-<th></th>
 
 <th>1X2</th>
 
@@ -602,21 +550,27 @@ ${m.timeWib}
 </td>
 
 <td>
+
 <strong>
 ${m.pick}
 </strong>
+
 </td>
 
 <td class="ou-col">
+
 <strong>
 ${m.ou}
 </strong>
+
 </td>
 
 <td class="score-col">
+
 <strong>
 ${m.score}
 </strong>
+
 </td>
 
 </tr>
@@ -688,7 +642,7 @@ export async function generateDailyParlay(){
     }
 
     const predictions =
-      groupPredictions(
+      await groupPredictions(
         apiResult.fixtures
       );
 
@@ -732,6 +686,8 @@ export async function generateDailyParlay(){
         ),
 
       content,
+
+      predictions,
 
       published:true,
 
@@ -780,8 +736,12 @@ export async function generateDailyParlay(){
     });
 
     return {
+
       ok:false,
-      error:err.message
+
+      error:
+        err.message
+
     };
 
   } finally {
@@ -800,8 +760,10 @@ async function writeStatus(update){
     );
 
   const next = {
+
     ...current,
     ...update
+
   };
 
   await writeJson(
