@@ -391,8 +391,8 @@ function predictMatch(fixture){
 
     ou:
       totalGoals >= 3
-        ? "OVER 2.5"
-        : "UNDER 3.5",
+        ? "OVER"
+        : "UNDER",
 
     score:
       `${homeGoals}-${awayGoals}`,
