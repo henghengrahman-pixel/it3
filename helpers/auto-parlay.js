@@ -104,15 +104,6 @@ const PRIORITY_LEAGUES = [
       "Saudi Pro League"
     ],
     score:88
-  },
-
-  {
-    key:"MLS",
-    names:[
-      "MLS",
-      "Major League Soccer"
-    ],
-    score:85
   }
 ];
 
@@ -142,8 +133,6 @@ const BIG_TEAMS = [
   "Dortmund",
   "Leverkusen",
   "PSG",
-  "Marseille",
-  "Lyon",
   "Al Nassr",
   "Al Hilal"
 ];
@@ -351,14 +340,6 @@ function predictMatch(fixture){
     awayPower += 10;
   }
 
-  if (
-    fixture.league
-      .toLowerCase()
-      .includes("indonesia")
-  ){
-    homePower += 5;
-  }
-
   const diff =
     homePower - awayPower;
 
@@ -371,12 +352,6 @@ function predictMatch(fixture){
   else if (diff <= -8){
     pick = "2";
   }
-
-  let confidence =
-    60 + Math.abs(diff);
-
-  confidence =
-    clamp(confidence, 52, 78);
 
   const homeGoals =
     pick === "1"
@@ -395,10 +370,13 @@ function predictMatch(fixture){
   const totalGoals =
     homeGoals + awayGoals;
 
-  return {
+  let confidence =
+    60 + Math.abs(diff);
 
-    match:
-      `${fixture.home} vs ${fixture.away}`,
+  confidence =
+    clamp(confidence, 52, 78);
+
+  return {
 
     home:
       fixture.home,
@@ -419,11 +397,11 @@ function predictMatch(fixture){
 
     ou:
       totalGoals >= 3
-        ? "OVER 2.5"
-        : "UNDER 3.5",
+        ? "OVER"
+        : "UNDER",
 
     score:
-      `${homeGoals}-${awayGoals}`,
+      `${homeGoals} - ${awayGoals}`,
 
     time:
       fixture.date,
@@ -537,35 +515,53 @@ Berikut rangkuman pertandingan pilihan dari liga besar dunia dan Liga Indonesia 
 
 ${predictions.map(group => `
 
-<div class="league-section">
+<div class="prediction-table-wrap">
 
 <h2 class="league-title">
 ${group.league}
 </h2>
 
-<div class="match-grid">
+<table class="prediksi-table">
 
-${group.matches.map((m, i) => `
+<thead>
 
-<div class="match-card">
+<tr>
 
-<div class="match-header">
+<th>
+${group.league}
+</th>
 
-<div class="match-number">
-#${i + 1}
-</div>
+<th colspan="3">
+Prediksi
+</th>
 
-<div class="match-time">
-${m.timeWib}
-</div>
+</tr>
 
-</div>
+<tr>
 
-<div class="match-body">
+<th></th>
+
+<th>1X2</th>
+
+<th>O/U</th>
+
+<th>SKOR</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${group.matches.map(m => `
+
+<tr>
+
+<td class="match-team-col">
+
+<div class="match-team-wrap">
 
 <div class="team-row">
-
-<div class="team">
 
 <img
 src="${m.homeLogo}"
@@ -579,11 +575,11 @@ ${m.home}
 
 </div>
 
-<div class="vs">
+<div class="vs-text">
 VS
 </div>
 
-<div class="team">
+<div class="team-row">
 
 <img
 src="${m.awayLogo}"
@@ -597,55 +593,39 @@ ${m.away}
 
 </div>
 
-</div>
-
-<div class="prediction-boxes">
-
-<div class="pred-box">
-
-<small>
-1X2
+<small class="match-time">
+${m.timeWib}
 </small>
 
+</div>
+
+</td>
+
+<td>
 <strong>
 ${m.pick}
 </strong>
+</td>
 
-</div>
-
-<div class="pred-box">
-
-<small>
-O/U
-</small>
-
+<td class="ou-col">
 <strong>
 ${m.ou}
 </strong>
+</td>
 
-</div>
-
-<div class="pred-box">
-
-<small>
-SKOR
-</small>
-
+<td class="score-col">
 <strong>
 ${m.score}
 </strong>
+</td>
 
-</div>
-
-</div>
-
-</div>
-
-</div>
+</tr>
 
 `).join("")}
 
-</div>
+</tbody>
+
+</table>
 
 </div>
 
