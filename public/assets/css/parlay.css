@@ -41,19 +41,19 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
 @media(max-width:680px){.parlay-hero h1{font-size:30px}.parlay-card{padding:14px}.parlay-body h2{font-size:22px}.prediksi-table{font-size:14px}.prediksi-table th,.prediksi-table td{padding:10px}.search-widget form{flex-direction:column}.parlay-single h1{font-size:26px}.parlay-single .league-title{font-size:24px!important}}
 .table-wrap{
   width:100%;
-  overflow-x:auto;
   margin:25px 0 35px;
   border-radius:18px;
   background:#ffffff;
   border:1px solid #e5e7eb;
   box-shadow:
     0 10px 30px rgba(0,0,0,.06);
+  overflow:hidden;
 }
 
 .table-wrap table{
   width:100%;
   border-collapse:collapse;
-  min-width:700px;
+  table-layout:fixed;
   background:#fff;
 }
 
@@ -70,10 +70,9 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
   color:#fff;
   font-size:15px;
   font-weight:700;
-  padding:18px 16px;
+  padding:16px 10px;
   text-align:center;
   border:none;
-  white-space:nowrap;
 }
 
 .table-wrap tbody tr{
@@ -91,17 +90,40 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
 }
 
 .table-wrap tbody td{
-  padding:18px 16px;
-  font-size:15px;
+  padding:18px 10px;
+  font-size:14px;
   color:#111827;
   vertical-align:middle;
   text-align:center;
-  line-height:1.6;
+  line-height:1.5;
+  word-break:break-word;
+}
+
+.table-wrap tbody td:nth-child(1){
+  width:50px;
+  font-weight:700;
 }
 
 .table-wrap tbody td:nth-child(2){
+  width:58%;
   text-align:left;
-  min-width:320px;
+}
+
+.table-wrap tbody td:nth-child(3){
+  width:10%;
+  font-weight:800;
+}
+
+.table-wrap tbody td:nth-child(4){
+  width:16%;
+  font-weight:700;
+  color:#d97706;
+}
+
+.table-wrap tbody td:nth-child(5){
+  width:16%;
+  font-weight:800;
+  color:#059669;
 }
 
 .table-wrap tbody td strong{
@@ -109,37 +131,15 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
   font-size:18px;
   font-weight:800;
   color:#000;
-  line-height:1.5;
-  margin-bottom:4px;
+  line-height:1.4;
+  margin-bottom:6px;
 }
 
 .table-wrap tbody td small{
   display:inline-block;
-  font-size:13px;
+  font-size:12px;
   color:#6b7280;
   font-weight:600;
-}
-
-.table-wrap tbody td:nth-child(3){
-  font-weight:800;
-  color:#111827;
-  font-size:16px;
-}
-
-.table-wrap tbody td:nth-child(4){
-  font-weight:700;
-  color:#d97706;
-}
-
-.table-wrap tbody td:nth-child(5){
-  font-weight:800;
-  color:#059669;
-}
-
-.table-wrap tbody td:first-child{
-  width:60px;
-  font-weight:700;
-  color:#374151;
 }
 
 @media(max-width:768px){
@@ -150,24 +150,41 @@ body.body-parlay .btn-cta.is-active{box-shadow:0 0 0 3px rgba(217,0,24,.18),0 10
   }
 
   .table-wrap table{
-    min-width:620px;
+    table-layout:auto;
   }
 
   .table-wrap thead th{
-    font-size:13px;
-    padding:14px 12px;
+    font-size:12px;
+    padding:14px 6px;
   }
 
   .table-wrap tbody td{
-    font-size:13px;
-    padding:14px 12px;
+    font-size:12px;
+    padding:14px 6px;
   }
 
   .table-wrap tbody td strong{
-    font-size:15px;
+    font-size:14px;
+    line-height:1.4;
   }
 
   .table-wrap tbody td small{
-    font-size:11px;
+    font-size:10px;
+  }
+
+  .table-wrap tbody td:nth-child(2){
+    width:auto;
+  }
+
+  .table-wrap tbody td:nth-child(3){
+    width:55px;
+  }
+
+  .table-wrap tbody td:nth-child(4){
+    width:75px;
+  }
+
+  .table-wrap tbody td:nth-child(5){
+    width:60px;
   }
 }
