@@ -28,41 +28,68 @@ const DEFAULT_THUMBNAIL =
 
 const PRIORITY_LEAGUES = [
 
+  // ======================
   // INDONESIA
+  // ======================
+
   "Liga 1",
   "BRI Liga 1",
   "Indonesia",
 
-  // ENGLAND
+  // ======================
+  // INGGRIS
+  // ======================
+
   "Premier League",
   "England Premier League",
 
-  // SPAIN
+  // ======================
+  // SPANYOL
+  // ======================
+
   "La Liga",
   "Spain La Liga",
 
-  // ITALY
+  // ======================
+  // ITALIA
+  // ======================
+
   "Serie A",
   "Italy Serie A",
 
-  // GERMANY
+  // ======================
+  // JERMAN
+  // ======================
+
   "Bundesliga",
   "Germany Bundesliga",
 
-  // FRANCE
+  // ======================
+  // PRANCIS
+  // ======================
+
   "Ligue 1",
   "France Ligue 1",
 
-  // EUROPE
+  // ======================
+  // EROPA
+  // ======================
+
   "Champions League",
   "Europa League",
   "Conference League",
 
+  // ======================
   // ASIA
+  // ======================
+
   "Saudi Pro League",
   "AFC Champions League",
 
-  // AMERICA
+  // ======================
+  // AMERIKA
+  // ======================
+
   "MLS",
   "Copa Libertadores"
 
@@ -78,8 +105,6 @@ const BLOCKED_KEYWORDS = [
   "Female",
   "Feminine",
 
-  "U15",
-  "U16",
   "U17",
   "U18",
   "U19",
@@ -96,55 +121,7 @@ const BLOCKED_KEYWORDS = [
   "Friendly",
   "Friendlies",
 
-  "Amateur",
-
-  "College",
-  "University",
-
-  "Regional",
-  "Division 2",
-  "Division 3"
-
-];
-
-/* =========================
-   BIG TEAM PRIORITY
-========================= */
-
-const BIG_TEAMS = [
-
-  // ENGLAND
-  "Manchester United",
-  "Manchester City",
-  "Liverpool",
-  "Arsenal",
-  "Chelsea",
-  "Tottenham",
-
-  // SPAIN
-  "Real Madrid",
-  "Barcelona",
-  "Atletico Madrid",
-
-  // ITALY
-  "Juventus",
-  "Inter",
-  "AC Milan",
-  "Milan",
-
-  // GERMANY
-  "Bayern Munich",
-  "Dortmund",
-
-  // FRANCE
-  "PSG",
-
-  // INDONESIA
-  "Persib",
-  "Persija",
-  "Persebaya",
-  "Arema",
-  "Bali United"
+  "Amateur"
 
 ];
 
@@ -327,29 +304,7 @@ function hashNum(text){
 }
 
 /* =========================
-   HOT MATCH
-========================= */
-
-function isBigMatch(home = "", away = ""){
-
-  const text =
-    `${home} ${away}`
-      .toLowerCase();
-
-  return BIG_TEAMS.some(
-
-    team =>
-
-      text.includes(
-        team.toLowerCase()
-      )
-
-  );
-
-}
-
-/* =========================
-   PREDICT
+   AI PREDICT
 ========================= */
 
 function predictMatch(fixture){
@@ -445,47 +400,7 @@ ${fixture.date}
       ? "OVER"
       : "UNDER";
 
-  const hot =
-    isBigMatch(
-      fixture.home,
-      fixture.away
-    );
-
-  const confidence =
-    pick === "X"
-      ? "MEDIUM"
-      : ou === "OVER"
-        ? "HIGH"
-        : "SAFE";
-
-  const kickoff =
-    new Intl.DateTimeFormat(
-      "id-ID",
-      {
-        timeZone:"Asia/Jakarta",
-        hour:"2-digit",
-        minute:"2-digit"
-      }
-    ).format(
-      new Date(fixture.date)
-    ) + " WIB";
-
-  const odds =
-    pick === "X"
-      ? 3.10
-      : hot
-        ? 1.72
-        : 1.88;
-
   return {
-
-    hot,
-
-    confidence,
-
-    kickoff,
-
-    odds,
 
     match:
       `${fixture.home} vs ${fixture.away}`,
@@ -518,6 +433,10 @@ function allowedLeague(name = ""){
   const leagueName =
     String(name).toLowerCase();
 
+  // ======================
+  // BLOCK LIGA TIDAK PENTING
+  // ======================
+
   if (
 
     BLOCKED_KEYWORDS.some(
@@ -535,6 +454,10 @@ function allowedLeague(name = ""){
     return false;
 
   }
+
+  // ======================
+  // PRIORITAS LIGA BESAR
+  // ======================
 
   return PRIORITY_LEAGUES.some(
 
@@ -561,11 +484,10 @@ function groupPredictions(fixtures){
 
     const f =
       normalizeFixture(raw);
-
     console.log(
-      "[AUTO PARLAY LEAGUE]",
-      f.league
-    );
+  "[AUTO PARLAY LEAGUE]",
+  f.league
+);
 
     // STATUS
     if (
@@ -610,31 +532,9 @@ function groupPredictions(fixtures){
       .get(f.league)
       .push(item);
 
-    grouped
-      .get(f.league)
-      .sort((a,b)=>{
-
-        // HOT MATCH
-        if (a.hot && !b.hot)
-          return -1;
-
-        if (!a.hot && b.hot)
-          return 1;
-
-        // CONFIDENCE
-        if (
-          a.confidence === "HIGH" &&
-          b.confidence !== "HIGH"
-        ){
-          return -1;
-        }
-
-        return 0;
-
-      });
-
   }
 
+  // SORT PRIORITAS
   const sorted =
     [...grouped.entries()]
       .sort((a,b)=>{
@@ -655,26 +555,14 @@ function groupPredictions(fixtures){
       league,
 
       matches:
-        matches
-          .slice(
-            0,
-            Number(
-              process.env
-              .AUTO_PARLAY_MAX_MATCHES_PER_LEAGUE ||
-              12
-            )
+        matches.slice(
+          0,
+          Number(
+            process.env
+            .AUTO_PARLAY_MAX_MATCHES_PER_LEAGUE ||
+            12
           )
-          .sort((a,b)=>{
-
-            if (a.hot && !b.hot)
-              return -1;
-
-            if (!a.hot && b.hot)
-              return 1;
-
-            return 0;
-
-          })
+        )
 
     })
 
@@ -741,5 +629,521 @@ function limitLeagues(predictions){
   }
 
   return result;
+
+}
+/* =========================
+   CONTENT
+========================= */
+
+function contentFromPredictions(
+  title,
+  predictions
+){
+
+  const leagueNames =
+    predictions
+      .slice(0, 6)
+      .map(p => p.league)
+      .join(", ");
+
+  const total =
+    predictions.reduce(
+      (sum, row) =>
+        sum + row.matches.length,
+      0
+    );
+
+  return `
+<p>
+Prediksi Parlay malam ini
+menyajikan rangkuman pertandingan
+pilihan yang akan bermain hari ini.
+</p>
+
+<p>
+Artikel
+<strong>${title}</strong>
+memuat
+${total}
+pertandingan dari beberapa kompetisi,
+termasuk
+${leagueNames}.
+</p>
+
+<p>
+Gunakan prediksi ini sebagai
+referensi tambahan sebelum bermain.
+</p>
+`;
+
+}
+
+/* =========================
+   STATUS
+========================= */
+
+async function writeStatus(update){
+
+  const current =
+    await readJson(
+      STATUS_FILE,
+      {
+        enabled:true,
+        running:false,
+        lastRunAt:null,
+        lastSuccessAt:null,
+        lastError:null,
+        lastCreatedSlug:null,
+        nextRunAt:null
+      }
+    );
+
+  const next = {
+
+    ...current,
+    ...update
+
+  };
+
+  await writeJson(
+    STATUS_FILE,
+    next
+  );
+
+  return next;
+
+}
+
+async function uniqueSlugForDate(
+  title,
+  posts
+){
+
+  const base =
+    slugify(title);
+
+  let slug = base;
+
+  let i = 2;
+
+  while (
+    posts.some(
+      p => p.slug === slug
+    )
+  ){
+
+    slug =
+      `${base}-${i++}`;
+
+  }
+
+  return slug;
+
+}
+
+/* =========================
+   GET STATUS
+========================= */
+
+export async function
+getAutoParlayStatus(){
+
+  return readJson(
+    STATUS_FILE,
+    {
+      enabled:
+        process.env
+        .AUTO_PARLAY_ENABLED !== "false",
+
+      running:false,
+
+      lastRunAt:null,
+
+      lastSuccessAt:null,
+
+      lastError:null,
+
+      lastCreatedSlug:null,
+
+      nextRunAt:null
+    }
+  );
+
+}
+
+/* =========================
+   GENERATE
+========================= */
+
+export async function
+generateDailyParlay({
+
+  force = false,
+  date = null
+
+} = {}){
+
+  if (running){
+
+    return {
+
+      ok:false,
+
+      skipped:true,
+
+      message:
+        "Auto parlay sedang berjalan."
+
+    };
+
+  }
+
+  running = true;
+
+  const runAt =
+    new Date().toISOString();
+
+  await writeStatus({
+
+    running:true,
+
+    lastRunAt:runAt,
+
+    lastError:null
+
+  });
+
+  try {
+
+    const targetDate =
+      date || nowParts().date;
+
+    const posts =
+      await getPosts({
+        includeDrafts:true
+      });
+
+    const existing =
+      posts.find(
+        p =>
+          p.autoGenerated &&
+          p.autoDate === targetDate
+      );
+
+    if (
+      existing &&
+      !force
+    ){
+
+      await writeStatus({
+
+        running:false,
+
+        lastSuccessAt:runAt,
+
+        lastCreatedSlug:
+          existing.slug,
+
+        lastError:null
+
+      });
+
+      return {
+
+        ok:true,
+
+        skipped:true,
+
+        post:existing
+
+      };
+
+    }
+
+    const apiResult =
+      await getFixturesByDate(
+        targetDate
+      );
+
+    if (!apiResult.ok){
+
+      await writeStatus({
+
+        running:false,
+
+        lastError:
+          apiResult.error
+
+      });
+
+      return {
+
+        ok:false,
+
+        error:
+          apiResult.error
+
+      };
+
+    }
+
+    const predictions =
+      limitLeagues(
+        groupPredictions(
+          apiResult.fixtures
+        )
+      );
+
+    if (!predictions.length){
+
+      const msg =
+        `Tidak ada pertandingan untuk ${targetDate}`;
+
+      await writeStatus({
+
+        running:false,
+
+        lastError:msg
+
+      });
+
+      return {
+
+        ok:false,
+
+        error:msg
+
+      };
+
+    }
+
+    const title =
+      `PREDIKSI PARLAY JITU MALAM INI ${prettyDateRange(targetDate)}`;
+
+    let rows =
+      force
+        ? posts.filter(
+            p =>
+              !(
+                p.autoGenerated &&
+                p.autoDate === targetDate
+              )
+          )
+        : posts;
+
+    const slug =
+      await uniqueSlugForDate(
+        title,
+        rows
+      );
+
+    const content =
+      contentFromPredictions(
+        title,
+        predictions
+      );
+
+    const now =
+      new Date().toISOString();
+
+    const totalMatches =
+      predictions.reduce(
+        (sum,row)=>
+          sum + row.matches.length,
+        0
+      );
+
+    const post = {
+
+      id:
+        `auto-${crypto.randomUUID().slice(0,8)}`,
+
+      title,
+
+      slug,
+
+      category:
+        "Prediksi Parlay",
+
+      tags:[
+        "Prediksi Bola",
+        "Parlay Hari Ini",
+        "Tips Bola"
+      ],
+
+      author:
+        process.env
+        .AUTO_PARLAY_AUTHOR ||
+        "Master Parlay",
+
+      thumbnail:
+        DEFAULT_THUMBNAIL,
+
+      excerpt:
+        makeExcerpt(
+          `Prediksi parlay otomatis hari ini berisi ${totalMatches} pertandingan pilihan lengkap dengan 1X2, over/under, dan perkiraan skor.`
+        ),
+
+      content,
+
+      published:true,
+
+      autoGenerated:true,
+
+      autoDate:targetDate,
+
+      fixtureSource:
+        "api-football",
+
+      createdAt:now,
+
+      updatedAt:now,
+
+      predictions
+
+    };
+
+    rows.unshift(post);
+
+    await savePosts(rows);
+
+    await writeStatus({
+
+      running:false,
+
+      lastSuccessAt:now,
+
+      lastCreatedSlug:slug,
+
+      lastError:null
+
+    });
+
+    return {
+
+      ok:true,
+
+      skipped:false,
+
+      post,
+
+      totalMatches
+
+    };
+
+  } catch (err){
+
+    const error =
+      err?.message ||
+      String(err);
+
+    await writeStatus({
+
+      running:false,
+
+      lastError:error
+
+    });
+
+    return {
+
+      ok:false,
+
+      error
+
+    };
+
+  } finally {
+
+    running = false;
+
+  }
+
+}
+
+/* =========================
+   START
+========================= */
+
+export function
+startAutoParlayScheduler(){
+
+  if (
+    process.env
+    .AUTO_PARLAY_ENABLED === "false"
+  ){
+
+    console.log(
+      "[AUTO PARLAY] disabled"
+    );
+
+    return;
+
+  }
+
+  const scheduleNext =
+    async () => {
+
+      const delay =
+        nextMidnightDelay();
+
+      const nextRunAt =
+        new Date(
+          Date.now() + delay
+        ).toISOString();
+
+      await writeStatus({
+
+        enabled:true,
+        nextRunAt
+
+      }).catch(()=>{});
+
+      timer =
+        setTimeout(
+          async()=>{
+
+            console.log(
+              `[AUTO PARLAY] run 00:00 ${TZ}`
+            );
+
+            await generateDailyParlay();
+
+            scheduleNext();
+
+          },
+          delay
+        );
+
+    };
+
+  scheduleNext();
+
+  if (
+    process.env
+    .AUTO_PARLAY_RUN_ON_START === "true"
+  ){
+
+    setTimeout(()=>{
+
+      generateDailyParlay();
+
+    },5000);
+
+  }
+
+}
+
+/* =========================
+   STOP
+========================= */
+
+export function
+stopAutoParlayScheduler(){
+
+  if (timer)
+    clearTimeout(timer);
+
+  timer = null;
 
 }
