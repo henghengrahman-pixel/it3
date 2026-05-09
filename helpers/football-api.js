@@ -1,167 +1,83 @@
-export function normalizePrediction(prediction){
+import axios from "axios";
 
-  const p =
-    prediction?.predictions ||
-    {};
+const DEFAULT_BASE_URL = "https://v3.football.api-sports.io";
 
-  const winner =
-    p?.winner ||
-    {};
+function apiKey(){
+  return process.env.FOOTBALL_API_KEY || process.env.API_FOOTBALL_KEY || "";
+}
 
-  const percent =
-    p?.percent ||
-    {};
+function apiHost(){
+  return process.env.FOOTBALL_API_HOST || "api-football-v1.p.rapidapi.com";
+}
 
-  const advice =
-    p?.advice ||
-    "";
+function apiBaseUrl(){
+  return process.env.FOOTBALL_API_BASE_URL || process.env.API_FOOTBALL_BASE_URL || DEFAULT_BASE_URL;
+}
 
-  const underOverRaw =
-    p?.under_over ||
-    "";
+function headers(){
+  const key = apiKey();
+  const base = apiBaseUrl();
 
-  let pick = "X";
+  if (!key) return {};
 
-  // DETECT PICK
-  if (
-    winner?.comment &&
-    /away/i.test(
-      winner.comment
-    )
-  ){
-
-    pick = "2";
-
-  }
-
-  else if (
-    winner?.comment &&
-    /draw/i.test(
-      winner.comment
-    )
-  ){
-
-    pick = "X";
-
-  }
-
-  else {
-
-    pick = "1";
-  }
-
-  // LAST 5 GOALS
-  const homeRecentGoals =
-    Number(
-      prediction?.teams?.home?.last_5?.goals?.for?.total || 10
-    );
-
-  const awayRecentGoals =
-    Number(
-      prediction?.teams?.away?.last_5?.goals?.for?.total || 8
-    );
-
-  // BUILD NATURAL SCORE
-  let homeGoals = 1;
-  let awayGoals = 1;
-
-  if (pick === "1"){
-
-    homeGoals =
-      Math.max(
-        1,
-        Math.round(
-          homeRecentGoals / 5
-        )
-      );
-
-    awayGoals =
-      Math.max(
-        0,
-        Math.round(
-          awayRecentGoals / 10
-        )
-      );
-  }
-
-  else if (pick === "2"){
-
-    awayGoals =
-      Math.max(
-        1,
-        Math.round(
-          awayRecentGoals / 5
-        )
-      );
-
-    homeGoals =
-      Math.max(
-        0,
-        Math.round(
-          homeRecentGoals / 10
-        )
-      );
-  }
-
-  else {
-
-    homeGoals = 1;
-    awayGoals = 1;
-  }
-
-  // LIMIT MAX
-  if (homeGoals > 4){
-    homeGoals = 4;
-  }
-
-  if (awayGoals > 4){
-    awayGoals = 4;
-  }
-
-  // BUILD O/U
-  let underOver =
-    "UNDER 2.5";
-
-  const cleanOU =
-    String(
-      underOverRaw || ""
-    )
-      .replace("-", "")
-      .trim();
-
-  if (cleanOU){
-
-    underOver =
-      `OVER ${cleanOU}`;
-  }
-
-  else {
-
-    underOver =
-      homeGoals + awayGoals >= 3
-        ? "OVER 2.5"
-        : "UNDER 2.5";
+  // Support 2 model API:
+  // 1) API-Sports direct: x-apisports-key
+  // 2) RapidAPI: X-RapidAPI-Key + X-RapidAPI-Host
+  if (/rapidapi/i.test(base) || process.env.FOOTBALL_API_PROVIDER === "rapidapi") {
+    return {
+      "X-RapidAPI-Key": key,
+      "X-RapidAPI-Host": apiHost()
+    };
   }
 
   return {
+    "x-apisports-key": key
+  };
+}
 
-    pick,
+export function hasFootballApiKey(){
+  return Boolean(apiKey());
+}
 
-    advice,
+export async function getFixturesByDate(date){
+  if (!hasFootballApiKey()) {
+    return {
+      ok:false,
+      error:"FOOTBALL_API_KEY/API_FOOTBALL_KEY belum diisi di Railway Variables.",
+      fixtures:[]
+    };
+  }
 
-    underOver,
+  try {
+    const res = await axios.get(`${apiBaseUrl().replace(/\/+$/, "")}/fixtures`, {
+      headers: headers(),
+      params: { date },
+      timeout: Number(process.env.FOOTBALL_API_TIMEOUT || 15000)
+    });
 
-    score:
-      `${homeGoals} - ${awayGoals}`,
+    return {
+      ok:true,
+      error:null,
+      fixtures: Array.isArray(res.data?.response) ? res.data.response : []
+    };
+  } catch (err) {
+    return {
+      ok:false,
+      error: err?.response?.data?.message || err?.response?.data || err.message,
+      fixtures:[]
+    };
+  }
+}
 
-    percentHome:
-      percent?.home || "",
-
-    percentDraw:
-      percent?.draw || "",
-
-    percentAway:
-      percent?.away || ""
-
+export function normalizeFixture(row){
+  return {
+    id: row?.fixture?.id || `${row?.teams?.home?.name || "home"}-${row?.teams?.away?.name || "away"}`,
+    date: row?.fixture?.date || "",
+    timestamp: row?.fixture?.timestamp || 0,
+    status: row?.fixture?.status?.short || "",
+    league: row?.league?.name || "Liga",
+    country: row?.league?.country || "",
+    home: row?.teams?.home?.name || "Home",
+    away: row?.teams?.away?.name || "Away"
   };
 }
