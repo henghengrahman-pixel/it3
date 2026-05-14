@@ -1,0 +1,7 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title><%= pageTitle || settings.metaTitle || settings.siteName || 'Prediksi Bola' %></title>
+<meta name="description" content="<%= pageDescription || settings.metaDescription || '' %>" />
+<% if (settings.faviconUrl || settings.logoUrl) { %><link rel="icon" type="image/png" href="<%= settings.faviconUrl || settings.logoUrl %>" /><% } %>
+<% (styles || []).forEach(function(href) { %><link rel="stylesheet" href="<%= href %>" />
+<% }) %>

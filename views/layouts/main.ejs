@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="id">
+<head><%- include('../partials/head') %></head>
+<%
+  const bgDesktop = settings && settings.backgroundDesktop ? `url('${settings.backgroundDesktop}') center/cover fixed,` : '';
+  const bgMobile = settings && settings.backgroundMobile ? settings.backgroundMobile : '';
+%>
+<body style="<%= bgDesktop ? `background:${bgDesktop} linear-gradient(180deg,#0a0a0c,#111113);` : '' %>" data-bg-mobile="<%= bgMobile %>">
+<%- body %>
+<%- include('../partials/scripts') %>
+</body>
+</html>

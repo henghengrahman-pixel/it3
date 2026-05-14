@@ -1,0 +1,411 @@
+<div class="admin-shell">
+
+  <%- include('_sidebar') %>
+
+  <main class="admin-main">
+
+    <div class="admin-page-head">
+
+      <div>
+        <h1>Site Settings</h1>
+        <p>
+          Pengaturan branding website, background,
+          berita bola, sponsor ads, dan tampilan portal.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="admin-card">
+
+      <form
+        class="admin-form-grid"
+        method="post"
+        action="/admin/settings"
+        enctype="multipart/form-data"
+      >
+
+        <!-- =====================================
+        BRANDING
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Branding Website</h2>
+        </div>
+
+        <label>
+          Nama Website
+
+          <input
+            name="siteName"
+            value="<%= settings.siteName || '' %>"
+            placeholder="OMTOGEL"
+          />
+        </label>
+
+        <label>
+          Subtitle Website
+
+          <input
+            name="siteSubtitle"
+            value="<%= settings.siteSubtitle || '' %>"
+            placeholder="Portal Bola Premium"
+          />
+        </label>
+
+        <label>
+          Login URL
+
+          <input
+            name="loginUrl"
+            value="<%= settings.loginUrl || '' %>"
+          />
+        </label>
+
+        <label>
+          Daftar URL
+
+          <input
+            name="registerUrl"
+            value="<%= settings.registerUrl || '' %>"
+          />
+        </label>
+
+        <label>
+          Live URL
+
+          <input
+            name="liveUrl"
+            value="<%= settings.liveUrl || '/live' %>"
+          />
+        </label>
+
+        <label>
+          Berita URL
+
+          <input
+            name="newsUrl"
+            value="<%= settings.newsUrl || '/berita' %>"
+          />
+        </label>
+
+        <!-- =====================================
+        LOGO
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Logo & Favicon</h2>
+        </div>
+
+        <label>
+          Logo URL
+
+          <input
+            name="logoUrl"
+            value="<%= settings.logoUrl || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Upload Logo
+
+          <input
+            type="file"
+            name="logoFile"
+            accept="image/*"
+          />
+        </label>
+
+        <label>
+          Favicon URL
+
+          <input
+            name="faviconUrl"
+            value="<%= settings.faviconUrl || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Upload Favicon
+
+          <input
+            type="file"
+            name="faviconFile"
+            accept="image/*"
+          />
+        </label>
+
+        <% if (settings.logoUrl) { %>
+
+        <div class="full">
+
+          <div class="preview-box">
+
+            <div class="preview-title">
+              Preview Logo
+            </div>
+
+            <img
+              src="<%= settings.logoUrl %>"
+              alt="Logo"
+              class="preview-image logo-preview"
+            >
+
+          </div>
+
+        </div>
+
+        <% } %>
+
+        <!-- =====================================
+        BACKGROUND
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Background Website</h2>
+        </div>
+
+        <label>
+          Background Desktop URL
+
+          <input
+            name="backgroundDesktop"
+            value="<%= settings.backgroundDesktop || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Upload Background Desktop
+
+          <input
+            type="file"
+            name="backgroundDesktopFile"
+            accept="image/*"
+          />
+        </label>
+
+        <label>
+          Background Mobile URL
+
+          <input
+            name="backgroundMobile"
+            value="<%= settings.backgroundMobile || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Upload Background Mobile
+
+          <input
+            type="file"
+            name="backgroundMobileFile"
+            accept="image/*"
+          />
+        </label>
+
+        <label>
+          Overlay Opacity
+
+          <input
+            name="overlayOpacity"
+            value="<%= settings.overlayOpacity || '0' %>"
+            placeholder="0 - 0.8"
+          />
+        </label>
+
+        <!-- =====================================
+        FOOTER
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Footer Website</h2>
+        </div>
+
+        <label>
+          Footer Text
+
+          <input
+            name="footerText"
+            value="<%= settings.footerText || '' %>"
+          />
+        </label>
+
+        <!-- =====================================
+        SIDEBAR ADS
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Sidebar Ads Banner</h2>
+        </div>
+
+        <label>
+          Sidebar Banner URL
+
+          <input
+            name="sidebarBanner"
+            value="<%= settings.sidebarBanner || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label>
+          Upload Banner Sidebar
+
+          <input
+            type="file"
+            name="sidebarBannerFile"
+            accept="image/*"
+          />
+        </label>
+
+        <label>
+          Sidebar Banner Link
+
+          <input
+            name="sidebarBannerLink"
+            value="<%= settings.sidebarBannerLink || '' %>"
+            placeholder="https://..."
+          />
+        </label>
+<% if (settings.sidebarBanner) { %>
+
+<div class="full">
+
+  <div class="preview-box sidebar-preview">
+
+    <div class="preview-title">
+      Preview Banner Sidebar
+    </div>
+
+    <div class="sidebar-preview-wrap">
+
+      <img
+        src="<%= settings.sidebarBanner %>"
+        alt="Sidebar Banner"
+        class="preview-image sidebar-preview-image"
+      >
+
+    </div>
+
+  </div>
+
+</div>
+
+<% } %>
+        <!-- =====================================
+        SEO
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>SEO Website</h2>
+        </div>
+
+        <label>
+          Meta Title
+
+          <input
+            name="metaTitle"
+            value="<%= settings.metaTitle || '' %>"
+          />
+        </label>
+
+        <!-- =====================================
+        BERITA SETTINGS
+        ====================================== -->
+
+        <div class="form-divider full">
+          <h2>Pengaturan Berita</h2>
+        </div>
+
+        <label>
+          Judul Search Berita
+
+          <input
+            name="newsSearchTitle"
+            value="<%= settings.newsSearchTitle || 'Cari Berita' %>"
+          />
+        </label>
+
+        <label>
+          Placeholder Search
+
+          <input
+            name="newsSearchPlaceholder"
+            value="<%= settings.newsSearchPlaceholder || '' %>"
+          />
+        </label>
+
+        <label>
+          Judul Trending
+
+          <input
+            name="newsTrendingTitle"
+            value="<%= settings.newsTrendingTitle || 'Trending News' %>"
+          />
+        </label>
+
+        <label>
+          Judul Kategori
+
+          <input
+            name="newsCategoryTitle"
+            value="<%= settings.newsCategoryTitle || 'Kategori Populer' %>"
+          />
+        </label>
+
+        <!-- =====================================
+        META DESCRIPTION
+        ====================================== -->
+
+        <label class="full">
+
+          Meta Description
+
+          <textarea
+            name="metaDescription"
+            rows="4"
+          ><%= settings.metaDescription || '' %></textarea>
+
+        </label>
+
+        <!-- =====================================
+        RUNNING TEXT
+        ====================================== -->
+
+        <label class="full">
+
+          Teks Berjalan
+
+          <textarea
+            name="runningText"
+            rows="4"
+          ><%= settings.runningText || '' %></textarea>
+
+        </label>
+
+        <!-- =====================================
+        BUTTON
+        ====================================== -->
+
+        <div class="full">
+
+          <button
+            class="admin-btn"
+            type="submit"
+          >
+            Simpan Settings Website
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+</div>

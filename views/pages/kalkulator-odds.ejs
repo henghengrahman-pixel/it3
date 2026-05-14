@@ -1,0 +1,360 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+
+<section class="parlay-calc-wrap">
+
+  <div class="container">
+
+    <div class="parlay-calc-grid">
+
+      <!-- LEFT -->
+
+      <div class="parlay-card">
+
+        <div class="parlay-card-title">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Kalkulator</span>
+        </div>
+
+        <div class="parlay-form-group">
+
+          <label>
+            Jumlah Taruhan (Rp):
+          </label>
+
+          <input
+            id="stake"
+            type="number"
+            value="100000"
+            min="1"
+            step="1000"
+            class="parlay-input"
+          >
+
+        </div>
+
+        <div class="parlay-form-group">
+
+          <label>
+            Pilihan Taruhan (Odds):
+          </label>
+
+          <div id="oddsContainer">
+
+            <div class="parlay-odds-item">
+
+              <input
+                class="oddsInput parlay-input"
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="Masukkan odds (contoh: 1.85)"
+              >
+
+              <button
+                type="button"
+                class="removeOdds"
+              >
+                ×
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="parlay-buttons">
+
+          <button
+            id="addOdds"
+            class="btn-yellow"
+            type="button"
+          >
+            + Tambah Pilihan
+          </button>
+
+          <button
+            id="calculate"
+            class="btn-green"
+            type="button"
+          >
+            Hitung Parlay
+          </button>
+
+          <button
+            id="reset"
+            class="btn-red"
+            type="button"
+          >
+            Reset
+          </button>
+
+        </div>
+
+        <div class="parlay-result">
+
+          <h3>
+            Hasil Perhitungan:
+          </h3>
+
+          <div class="result-row">
+            <span>Total Odds:</span>
+            <strong id="totalOdds">1.00</strong>
+          </div>
+
+          <div class="result-row">
+            <span>Potensi Kemenangan:</span>
+            <strong id="payout">Rp 0</strong>
+          </div>
+
+          <div class="result-row">
+            <span>Potensi Keuntungan:</span>
+            <strong id="profit">Rp 0</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+
+      <div class="parlay-card">
+
+        <div class="parlay-card-title">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Cara Menghitung Odds Parlay</span>
+        </div>
+
+        <div class="parlay-info-box">
+
+          <h3>
+            Apa itu Taruhan Parlay?
+          </h3>
+
+          <p>
+            Taruhan parlay adalah jenis taruhan
+            di mana Anda menggabungkan beberapa
+            taruhan menjadi satu.
+          </p>
+
+          <p>
+            Untuk memenangkan parlay,
+            semua taruhan harus menang.
+          </p>
+
+          <h3>
+            Rumus Menghitung Parlay
+          </h3>
+
+          <p>
+            Perhitungan dilakukan dengan
+            mengalikan seluruh odds,
+            kemudian dikalikan dengan jumlah taruhan.
+          </p>
+
+          <div class="formula-box">
+
+            <p>
+              Total Odds = Odds 1 × Odds 2 × Odds berikutnya
+            </p>
+
+            <p>
+              Kemenangan = Total Odds × Jumlah Taruhan
+            </p>
+
+            <p>
+              Keuntungan = Kemenangan - Jumlah Taruhan
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="parlay-info-box">
+
+          <h3>
+            Contoh Perhitungan:
+          </h3>
+
+          <p>
+            Misalkan Anda memasang taruhan
+            dengan 3 pilihan odds:
+          </p>
+
+          <ul>
+            <li>1.85</li>
+            <li>2.10</li>
+            <li>1.95</li>
+          </ul>
+
+          <div class="formula-box">
+
+            <p>
+              Total Odds = 1.85 × 2.10 × 1.95
+            </p>
+
+            <p>
+              Hasil dihitung otomatis sesuai modal taruhan.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const oddsContainer = document.getElementById('oddsContainer');
+
+  const addBtn = document.getElementById('addOdds');
+  const calcBtn = document.getElementById('calculate');
+  const resetBtn = document.getElementById('reset');
+
+  const stakeInput = document.getElementById('stake');
+
+  const totalOdds = document.getElementById('totalOdds');
+  const payout = document.getElementById('payout');
+  const profit = document.getElementById('profit');
+
+  function formatRp(number) {
+
+    return 'Rp ' + Number(number).toLocaleString('id-ID');
+
+  }
+
+  function createOddsRow() {
+
+    const row = document.createElement('div');
+
+    row.className = 'parlay-odds-item';
+
+    row.innerHTML = `
+      <input
+        class="oddsInput parlay-input"
+        type="number"
+        min="1"
+        step="0.01"
+        placeholder="Masukkan odds (contoh: 1.85)"
+      >
+
+      <button
+        type="button"
+        class="removeOdds"
+      >
+        ×
+      </button>
+    `;
+
+    oddsContainer.appendChild(row);
+
+  }
+
+  addBtn.addEventListener('click', createOddsRow);
+
+  oddsContainer.addEventListener('click', (e) => {
+
+    if (!e.target.classList.contains('removeOdds')) return;
+
+    const rows = document.querySelectorAll('.parlay-odds-item');
+
+    if (rows.length <= 1) return;
+
+    e.target.closest('.parlay-odds-item').remove();
+
+  });
+
+  calcBtn.addEventListener('click', () => {
+
+    const inputs = document.querySelectorAll('.oddsInput');
+
+    let odds = 1;
+
+    let valid = true;
+
+    inputs.forEach(input => {
+
+      const val = parseFloat(input.value);
+
+      if (isNaN(val) || val < 1) {
+
+        valid = false;
+
+        input.style.borderColor = '#ff4d4d';
+
+      } else {
+
+        input.style.borderColor = '#3a2a00';
+
+        odds *= val;
+
+      }
+
+    });
+
+    if (!valid) return;
+
+    const stake = parseFloat(stakeInput.value);
+
+    if (isNaN(stake) || stake <= 0) return;
+
+    const total = odds * stake;
+
+    const untung = total - stake;
+
+    totalOdds.textContent = odds.toFixed(2);
+
+    payout.textContent = formatRp(total);
+
+    profit.textContent = formatRp(untung);
+
+  });
+
+  resetBtn.addEventListener('click', () => {
+
+    oddsContainer.innerHTML = `
+      <div class="parlay-odds-item">
+
+        <input
+          class="oddsInput parlay-input"
+          type="number"
+          min="1"
+          step="0.01"
+          placeholder="Masukkan odds (contoh: 1.85)"
+        >
+
+        <button
+          type="button"
+          class="removeOdds"
+        >
+          ×
+        </button>
+
+      </div>
+    `;
+
+    stakeInput.value = 100000;
+
+    totalOdds.textContent = '1.00';
+
+    payout.textContent = 'Rp 0';
+
+    profit.textContent = 'Rp 0';
+
+  });
+
+});
+</script>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

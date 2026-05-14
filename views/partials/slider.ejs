@@ -1,0 +1,12 @@
+<% if ((slides || []).length) { %>
+<section class="container">
+  <div class="slider" id="slider">
+    <div class="slide-track" id="track">
+      <% slides.forEach(function(slide) { %>
+      <div class="slide"><a href="<%= slide.link || '#' %>" <%= slide.link && slide.link !== '#' ? 'target="_blank" rel="noopener"' : '' %>><img src="<%= slide.image %>" alt="<%= slide.title || 'Slide' %>"></a></div>
+      <% }) %>
+    </div>
+    <% if (slides.length > 1) { %><button class="ctrl prev" id="prev" aria-label="Sebelumnya">❮</button><button class="ctrl next" id="next" aria-label="Berikutnya">❯</button><div class="dots" id="dots"></div><% } %>
+  </div>
+</section>
+<% } %>

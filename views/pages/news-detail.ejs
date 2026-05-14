@@ -1,0 +1,87 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+
+<main class="container news-layout detail-layout news-detail-premium">
+  <article class="article-wrap">
+    <a class="news-badge" href="/berita?category=<%= encodeURIComponent(article.category || 'Berita Bola') %>"><%= article.category || 'Berita Bola' %></a>
+    <h1><%= article.title %></h1>
+    <div class="news-meta"><%= fmtDate(article.publishedAt || article.createdAt) %> • <%= article.author || 'Redaksi Bola' %></div>
+
+    <% if (article.thumbnail) { %>
+      <img class="article-cover" src="<%= article.thumbnail %>" alt="<%= article.title %>">
+    <% } %>
+
+    <div class="article-content"><%- article.content || '' %></div>
+
+    <% if ((article.tags || []).length) { %>
+      <div class="tag-row">
+        <% article.tags.forEach(function(tag){ %>
+          <span>#<%= tag %></span>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <% if (related.length) { %>
+      <section class="related">
+        <h2>Berita Terkait</h2>
+        <div class="related-grid">
+          <% related.forEach(function(item){ %>
+            <a href="/berita/<%= item.slug %>">
+              <% if(item.thumbnail){ %>
+                <img src="<%= item.thumbnail %>" alt="<%= item.title %>">
+              <% } %>
+              <strong><%= item.title %></strong>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+  </article>
+
+  <aside class="news-sidebar">
+    <div class="side-box">
+      <h3>Cari Berita</h3>
+      <form class="news-search" action="/berita" method="get">
+        <input name="q" placeholder="Cari berita bola...">
+        <button>Cari</button>
+      </form>
+    </div>
+
+    <div class="side-box">
+      <h3>Artikel Terbaru</h3>
+      <div class="trend-list">
+        <% trending.forEach(function(item){ %>
+          <a class="trend-item" href="/berita/<%= item.slug %>">
+            <% if(item.thumbnail){ %>
+              <img src="<%= item.thumbnail %>" alt="<%= item.title %>">
+            <% } else { %>
+              <span class="trend-ph">⚽</span>
+            <% } %>
+            <div>
+              <strong><%= item.title %></strong>
+              <small><%= fmtDate(item.publishedAt || item.createdAt) %></small>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="side-box">
+      <h3><%= settings.newsCategoryTitle || 'Kategori Populer' %></h3>
+      <div class="cat-list">
+        <% categories.forEach(function(c){ %>
+          <a href="/berita?category=<%= encodeURIComponent(c) %>"><%= c %></a>
+        <% }) %>
+      </div>
+    </div>
+
+    <% if (settings.sidebarBanner) { %>
+      <a class="side-banner" href="#"><img src="<%= settings.sidebarBanner %>" alt="Banner"></a>
+    <% } %>
+  </aside>
+</main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

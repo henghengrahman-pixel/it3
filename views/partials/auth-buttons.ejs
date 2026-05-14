@@ -1,0 +1,7 @@
+<section class="container authbar">
+  <a class="btn-cta <%= activePage === 'home' ? 'btn-gold' : 'btn-rgb' %>" href="/">Home</a>
+  <% if (settings.loginUrl) { %><a class="btn-cta btn-rgb" href="<%= settings.loginUrl %>" target="_blank" rel="noopener">Login</a><% } %>
+  <a class="btn-cta <%= activePage === 'live' ? 'btn-gold' : 'btn-rgb' %>" href="<%= settings.liveUrl || '/live' %>">Live Score</a>
+  <a class="btn-cta <%= activePage === 'news' ? 'btn-gold' : 'btn-rgb' %>" href="<%= settings.newsUrl || '/berita' %>">Berita Bola</a>
+  <a class="btn-cta <%= activePage === 'calculator' ? 'btn-gold' : 'btn-rgb' %>" href="/kalkulator-odds">Kalkulator Odds</a>
+</section>

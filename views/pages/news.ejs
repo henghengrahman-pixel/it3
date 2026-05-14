@@ -1,0 +1,250 @@
+<%- include('../partials/topbar') %>
+<%- include('../partials/ticker') %>
+<%- include('../partials/slider') %>
+<%- include('../partials/auth-buttons') %>
+
+<section class="news-hero news-hero-premium">
+  <div class="container news-hero-inner">
+    <div class="news-hero-content">
+      <span class="news-kicker">PORTAL BERITA BOLA</span>
+      <h1>Berita Bola Terbaru</h1>
+      <p>
+        Update sepak bola terbaru, transfer pemain, big match,
+        jadwal liga besar, hasil pertandingan, dan artikel pilihan
+        dengan tampilan modern premium sportsbook.
+      </p>
+    </div>
+  </div>
+</section>
+
+<main class="container news-layout news-index-premium">
+
+  <!-- LEFT CONTENT -->
+  <section class="news-list">
+
+    <% if (!news.length) { %>
+
+      <div class="news-empty">
+        Belum ada berita.
+        Silakan tambah artikel dari admin panel.
+      </div>
+
+    <% } %>
+
+    <% news.forEach(function(item){ %>
+
+      <article class="news-card premium-news-card">
+
+        <a
+          class="news-thumb"
+          href="/berita/<%= item.slug %>"
+        >
+
+          <% if (item.thumbnail) { %>
+
+            <img
+              src="<%= item.thumbnail %>"
+              alt="<%= item.title %>"
+              loading="lazy"
+            >
+
+          <% } else { %>
+
+            <div class="news-thumb-placeholder">
+              BERITA BOLA
+            </div>
+
+          <% } %>
+
+        </a>
+
+        <div class="news-card-body">
+
+          <div class="news-meta-top">
+
+            <span class="news-badge">
+              <%= item.category || 'Berita Bola' %>
+            </span>
+
+            <% if ((item.tags || []).length) { %>
+
+              <span class="news-tag">
+                #<%= item.tags[0] %>
+              </span>
+
+            <% } %>
+
+          </div>
+
+          <h2 class="news-title">
+
+            <a href="/berita/<%= item.slug %>">
+              <%= item.title %>
+            </a>
+
+          </h2>
+
+          <div class="news-meta">
+
+            <span>
+              <%= fmtDate(item.publishedAt || item.createdAt) %>
+            </span>
+
+            <span>•</span>
+
+            <span>
+              <%= item.author || 'Redaksi Bola' %>
+            </span>
+
+          </div>
+
+          <p class="news-excerpt">
+            <%= item.excerpt || '' %>
+          </p>
+
+          <a
+            class="read-more"
+            href="/berita/<%= item.slug %>"
+          >
+            Baca Selengkapnya
+          </a>
+
+        </div>
+
+      </article>
+
+    <% }) %>
+
+  </section>
+
+  <!-- SIDEBAR -->
+  <aside class="news-sidebar">
+
+    <!-- SEARCH -->
+    <div class="side-box">
+
+      <h3>
+        <%= settings.newsSearchTitle || 'Cari Berita' %>
+      </h3>
+
+      <form
+        class="news-search"
+        action="/berita"
+        method="get"
+      >
+
+        <input
+          type="text"
+          name="q"
+          value="<%= q || '' %>"
+          placeholder="<%= settings.newsSearchPlaceholder || 'Cari berita bola...' %>"
+        >
+
+        <button type="submit">
+          Cari
+        </button>
+
+      </form>
+
+    </div>
+
+    <!-- TRENDING -->
+    <div class="side-box">
+
+      <h3>
+        <%= settings.newsTrendingTitle || 'Artikel Terbaru' %>
+      </h3>
+
+      <div class="trend-list">
+
+        <% trending.forEach(function(item){ %>
+
+          <a
+            class="trend-item"
+            href="/berita/<%= item.slug %>"
+          >
+
+            <% if(item.thumbnail){ %>
+
+              <img
+                src="<%= item.thumbnail %>"
+                alt="<%= item.title %>"
+              >
+
+            <% } else { %>
+
+              <span class="trend-ph">
+                ⚽
+              </span>
+
+            <% } %>
+
+            <div class="trend-content">
+
+              <strong>
+                <%= item.title %>
+              </strong>
+
+              <small>
+                <%= fmtDate(item.publishedAt || item.createdAt) %>
+              </small>
+
+            </div>
+
+          </a>
+
+        <% }) %>
+
+      </div>
+
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="side-box">
+
+      <h3>
+        <%= settings.newsCategoryTitle || 'Kategori Populer' %>
+      </h3>
+
+      <div class="cat-list">
+
+        <% categories.forEach(function(c){ %>
+
+          <a href="/berita?category=<%= encodeURIComponent(c) %>">
+            <%= c %>
+          </a>
+
+        <% }) %>
+
+      </div>
+
+    </div>
+
+    <!-- ADS BANNER -->
+    <% if (settings.sidebarBanner) { %>
+
+      <div class="side-box sidebar-ads">
+
+        <a
+          href="<%= settings.sidebarBannerLink || '#' %>"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+
+          <img
+            src="<%= settings.sidebarBanner %>"
+            alt="Sidebar Banner"
+          >
+
+        </a>
+
+      </div>
+
+    <% } %>
+
+  </aside>
+
+</main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/quick-menu') %>

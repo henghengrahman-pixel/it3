@@ -1,0 +1,19 @@
+<div class="admin-shell"><%- include('_sidebar') %><main class="admin-main"><h1><%= news ? 'Edit Berita' : 'Tambah Berita' %></h1><div class="admin-card"><form class="admin-form-grid" method="post" enctype="multipart/form-data" action="<%= news ? '/admin/news/'+news.id+'/update' : '/admin/news' %>">
+  <label class="full">Judul Berita<input name="title" value="<%= news?.title || '' %>" required /></label>
+  <label>Slug<input name="slug" value="<%= news?.slug || '' %>" placeholder="otomatis jika kosong" /></label>
+  <label>Status<select name="status"><option value="published" <%= !news || news.status !== 'draft' ? 'selected' : '' %>>Published</option><option value="draft" <%= news?.status === 'draft' ? 'selected' : '' %>>Draft</option></select></label>
+  <label>Kategori<input name="category" value="<%= news?.category || 'Berita Bola' %>" /></label>
+  <label>Author<input name="author" value="<%= news?.author || 'Redaksi Bola' %>" /></label>
+  <label>Tag, pisahkan koma<input name="tags" value="<%= (news?.tags || []).join(', ') %>" /></label>
+  <label>Tanggal Publish<input name="publishedAt" value="<%= news?.publishedAt || '' %>" placeholder="otomatis jika kosong" /></label>
+  <label>Thumbnail URL<input name="thumbnail" value="<%= news?.thumbnail || '' %>" /></label>
+  <label>Upload Thumbnail<input type="file" name="thumbnailFile" accept="image/*" /></label>
+  <label class="full">Excerpt<textarea name="excerpt" rows="3"><%= news?.excerpt || '' %></textarea></label>
+  <label class="full">Isi Artikel / HTML<textarea id="contentEditor" name="content" rows="16" required><%= news?.content || '' %></textarea></label>
+  <div class="full editor-help"><strong>Format cepat:</strong> pakai &lt;h2&gt;Sub Judul&lt;/h2&gt;, &lt;p&gt;Paragraf&lt;/p&gt;, &lt;ul&gt;&lt;li&gt;List&lt;/li&gt;&lt;/ul&gt;. Enter biasa tetap dirapikan di tampilan frontend.</div>
+  <button class="admin-btn" type="submit">Simpan Berita</button><a class="admin-btn ghost" href="/admin/news">Kembali</a>
+</form></div><div class="admin-card"><h2>Preview Artikel</h2><div id="articlePreview" class="article-preview"></div></div></main></div>
+<script>
+const editor=document.getElementById('contentEditor');const preview=document.getElementById('articlePreview');
+function renderPreview(){preview.innerHTML=editor.value||'<p>Preview artikel...</p>'} editor.addEventListener('input',renderPreview); renderPreview();
+</script>

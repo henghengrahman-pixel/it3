@@ -1,0 +1,297 @@
+<div class="admin-shell">
+
+  <%- include('partials/sidebar') %>
+
+  <main class="admin-main">
+
+    <div class="admin-page-head">
+
+      <div>
+        <h1>Kelola Banner Ads</h1>
+        <p>
+          Banner sidebar berita, sponsor sportsbook,
+          promo SBOBET, dan iklan homepage.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- =====================================
+    TAMBAH ADS
+    ====================================== -->
+
+    <div class="admin-card">
+
+      <div class="card-head">
+        <h2>Tambah Banner Ads</h2>
+      </div>
+
+      <form
+        class="admin-form-grid"
+        method="post"
+        enctype="multipart/form-data"
+        action="/admin/ads"
+      >
+
+        <label>
+          Judul Banner
+
+          <input
+            name="title"
+            required
+            placeholder="SBOBET Promo"
+          >
+        </label>
+
+        <label>
+          Link Banner
+
+          <input
+            name="link"
+            required
+            placeholder="https://..."
+          >
+        </label>
+
+        <label>
+          Image URL
+
+          <input
+            name="thumbnailUrl"
+            placeholder="https://..."
+          >
+        </label>
+
+        <label>
+          Upload Banner Image
+
+          <input
+            type="file"
+            name="imageFile"
+            accept="image/*"
+          >
+        </label>
+
+        <label>
+          Position
+
+          <select name="position">
+
+            <option value="sidebar">
+              Sidebar Berita
+            </option>
+
+            <option value="homepage">
+              Homepage
+            </option>
+
+            <option value="detail">
+              Detail Berita
+            </option>
+
+          </select>
+        </label>
+
+        <label>
+          Order
+
+          <input
+            type="number"
+            name="order"
+            value="1"
+          >
+        </label>
+
+        <label class="checkbox">
+
+          <input
+            type="checkbox"
+            name="active"
+            checked
+          >
+
+          Active Banner
+
+        </label>
+
+        <button
+          class="admin-btn"
+          type="submit"
+        >
+          Tambah Banner
+        </button>
+
+      </form>
+
+    </div>
+
+    <!-- =====================================
+    LIST ADS
+    ====================================== -->
+
+    <% if (!ads.length) { %>
+
+      <div class="admin-card empty-card">
+
+        <p>
+          Belum ada banner ads.
+        </p>
+
+      </div>
+
+    <% } %>
+
+    <% ads.forEach(function(item){ %>
+
+      <div class="admin-card ads-card">
+
+        <div class="ads-preview-wrap">
+
+          <% if(item.image){ %>
+
+            <img
+              class="ads-preview"
+              src="<%= item.image %>"
+              alt="<%= item.title %>"
+            >
+
+          <% } else { %>
+
+            <div class="ads-placeholder">
+              NO IMAGE
+            </div>
+
+          <% } %>
+
+        </div>
+
+        <form
+          class="admin-form-grid"
+          method="post"
+          enctype="multipart/form-data"
+          action="/admin/ads/<%= item.id %>/update"
+        >
+
+          <label>
+            Judul Banner
+
+            <input
+              name="title"
+              value="<%= item.title %>"
+            >
+          </label>
+
+          <label>
+            Link Banner
+
+            <input
+              name="link"
+              value="<%= item.link %>"
+            >
+          </label>
+
+          <label>
+            Image URL
+
+            <input
+              name="thumbnailUrl"
+              value="<%= item.image %>"
+            >
+          </label>
+
+          <label>
+            Upload Ganti Image
+
+            <input
+              type="file"
+              name="imageFile"
+              accept="image/*"
+            >
+          </label>
+
+          <label>
+            Position
+
+            <select name="position">
+
+              <option
+                value="sidebar"
+                <%= item.position === 'sidebar' ? 'selected' : '' %>
+              >
+                Sidebar Berita
+              </option>
+
+              <option
+                value="homepage"
+                <%= item.position === 'homepage' ? 'selected' : '' %>
+              >
+                Homepage
+              </option>
+
+              <option
+                value="detail"
+                <%= item.position === 'detail' ? 'selected' : '' %>
+              >
+                Detail Berita
+              </option>
+
+            </select>
+          </label>
+
+          <label>
+            Order
+
+            <input
+              type="number"
+              name="order"
+              value="<%= item.order %>"
+            >
+          </label>
+
+          <label class="checkbox">
+
+            <input
+              type="checkbox"
+              name="active"
+              <%= item.active ? 'checked' : '' %>
+            >
+
+            Active Banner
+
+          </label>
+
+          <div class="admin-actions-row">
+
+            <button
+              class="admin-btn"
+              type="submit"
+            >
+              Simpan Banner
+            </button>
+
+          </div>
+
+        </form>
+
+        <form
+          method="post"
+          action="/admin/ads/<%= item.id %>/delete"
+          onsubmit="return confirm('Hapus banner ini?')"
+        >
+
+          <button
+            class="admin-btn danger"
+            type="submit"
+          >
+            Hapus Banner
+          </button>
+
+        </form>
+
+      </div>
+
+    <% }) %>
+
+  </main>
+
+</div>
